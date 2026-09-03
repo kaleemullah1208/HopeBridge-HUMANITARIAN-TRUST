@@ -7,10 +7,6 @@ import {
   Mail, 
   Lock, 
   LogIn, 
-  ShieldAlert, 
-  User, 
-  HandHeart, 
-  Sparkles,
   AlertCircle
 } from 'lucide-react';
 
@@ -21,7 +17,7 @@ export const Login = () => {
   const [googleSubmitting, setGoogleSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const { login, loginWithGoogle, switchRole } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,12 +75,6 @@ export const Login = () => {
     } else {
       showToast('Google Sign-In Failed', res.error || 'Could not authenticate with Google.', 'error');
     }
-  };
-
-  const autofillAdmin = () => {
-    setEmail('admin@gmail.com');
-    setPassword('admin123');
-    setErrors({});
   };
 
   return (
@@ -170,45 +160,15 @@ export const Login = () => {
             <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-light)' }} />
           </div>
 
-          {/* Admin Fast Helper Box */}
-          <div style={{
-            backgroundColor: 'var(--primary-light)',
-            border: '1px solid var(--primary-border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '0.85rem 1rem',
-            marginBottom: '1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '0.5rem'
-          }}>
-            <div>
-              <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <ShieldAlert size={14} /> Admin Credentials
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Email: <strong>admin@gmail.com</strong> | Pass: <strong>admin123</strong>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={autofillAdmin}
-              className="btn btn-sm btn-primary"
-              style={{ fontSize: '0.75rem', padding: '0.3rem 0.65rem' }}
-            >
-              Autofill
-            </button>
-          </div>
-
           {/* Email/Password Form */}
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Email Address <span className="required">*</span></label>
               <div className="input-icon-wrap">
                 <Mail size={18} className="input-icon" />
                 <input
                   type="email"
-                  placeholder="admin@gmail.com"
+                  placeholder="Enter your email address (e.g. name@example.com)"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors({ ...errors, email: null }); }}
                   className={`form-control ${errors.email ? 'is-invalid' : ''}`}
@@ -226,7 +186,7 @@ export const Login = () => {
                 <label className="form-label" style={{ margin: 0 }}>Password <span className="required">*</span></label>
                 <a
                   href="#forgot"
-                  onClick={(e) => { e.preventDefault(); showToast('Password Reset', 'Use admin@gmail.com / admin123 or reset via Firebase Auth console.', 'info'); }}
+                  onClick={(e) => { e.preventDefault(); showToast('Password Reset', 'Please contact system support or reset password via Firebase console.', 'info'); }}
                   style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: '600' }}
                 >
                   Forgot password?
@@ -236,7 +196,7 @@ export const Login = () => {
                 <Lock size={18} className="input-icon" />
                 <input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Enter your secure password"
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); if (errors.password) setErrors({ ...errors, password: null }); }}
                   className={`form-control ${errors.password ? 'is-invalid' : ''}`}
