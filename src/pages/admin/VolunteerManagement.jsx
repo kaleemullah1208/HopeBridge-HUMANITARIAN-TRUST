@@ -21,7 +21,8 @@ import {
   Phone, 
   Calendar,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 
 export const VolunteerManagement = () => {
@@ -31,6 +32,7 @@ export const VolunteerManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusTab, setStatusTab] = useState('All');
   const [interestFilter, setInterestFilter] = useState('All');
+  const [loadingLive, setLoadingLive] = useState(false);
   
   // Detail Modal
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
@@ -38,11 +40,16 @@ export const VolunteerManagement = () => {
 
   const { showToast } = useToast();
 
-  const loadData = () => {
-    const list = volunteerService.getVolunteers();
-    setVolunteers(list);
+  const loadData = async () => {
+    setVolunteers(volunteerService.getVolunteers());
     setStats(volunteerService.getVolunteerStats());
     setCampaigns(campaignService.getCampaigns());
+
+    setLoadingLive(true);
+    const liveVols = await volunteerService.fetchVolunteers();
+    setVolunteers(liveVols);
+    setStats(volunteerService.getVolunteerStats());
+    setLoadingLive(false);
   };
 
   useEffect(() => {
@@ -128,9 +135,19 @@ export const VolunteerManagement = () => {
           </p>
         </div>
 
-        <button onClick={handleExportCSV} className="btn btn-sm btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Download size={15} /> Export Volunteer Directory
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button 
+            onClick={loadData} 
+            disabled={loadingLive}
+            className="btn btn-sm btn-outline" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <RefreshCw size={15} className={loadingLive ? 'spin' : ''} /> {loadingLive ? 'Syncing Firebase...' : 'Sync with Firebase'}
+          </button>
+          <button onClick={handleExportCSV} className="btn btn-sm btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Download size={15} /> Export Volunteer Directory
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}

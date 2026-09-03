@@ -24,7 +24,8 @@ import {
   ArrowRight,
   PlusCircle,
   Download,
-  FileSpreadsheet
+  FileSpreadsheet,
+  RefreshCw
 } from 'lucide-react';
 import { MONTHLY_ANALYTICS_DATA, CATEGORY_DISTRIBUTION } from '../../data/mockData';
 
@@ -35,23 +36,38 @@ export const DashboardHome = () => {
   const [recentDonations, setRecentDonations] = useState([]);
   const [recentVolunteers, setRecentVolunteers] = useState([]);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [loadingLive, setLoadingLive] = useState(false);
   const { showToast } = useToast();
 
-  const loadData = () => {
-    const dStats = donationService.getDonationStats();
-    setDonationStats(dStats);
-
-    const vStats = volunteerService.getVolunteerStats();
-    setVolunteerStats(vStats);
-
+  const loadData = async () => {
+    // 1. Immediate render from cache
+    setDonationStats(donationService.getDonationStats());
+    setVolunteerStats(volunteerService.getVolunteerStats());
     const allCampaigns = campaignService.getCampaigns();
     setCampaignsCount(allCampaigns.filter((c) => c.status === 'Active').length);
+    setRecentDonations(donationService.getDonations().slice(0, 5));
+    setRecentVolunteers(volunteerService.getVolunteers().slice(0, 5));
 
-    const donations = donationService.getDonations();
-    setRecentDonations(donations.slice(0, 5));
+    // 2. Fetch live data from Firestore in background
+    setLoadingLive(true);
+    try {
+      await Promise.allSettled([
+        donorService.fetchDonors(),
+        volunteerService.fetchVolunteers(),
+        donationService.fetchDonations(),
+        campaignService.fetchCampaignsFromFirestore()
+      ]);
 
-    const volunteers = volunteerService.getVolunteers();
-    setRecentVolunteers(volunteers.slice(0, 5));
+      setDonationStats(donationService.getDonationStats());
+      setVolunteerStats(volunteerService.getVolunteerStats());
+      const updatedCampaigns = campaignService.getCampaigns();
+      setCampaignsCount(updatedCampaigns.filter((c) => c.status === 'Active').length);
+      setRecentDonations(donationService.getDonations().slice(0, 5));
+      setRecentVolunteers(volunteerService.getVolunteers().slice(0, 5));
+    } catch (err) {
+      console.warn('Dashboard live sync note:', err);
+    }
+    setLoadingLive(false);
   };
 
   useEffect(() => {
@@ -94,6 +110,14 @@ export const DashboardHome = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button 
+            onClick={loadData} 
+            disabled={loadingLive}
+            className="btn btn-sm btn-outline" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <RefreshCw size={15} className={loadingLive ? 'spin' : ''} /> {loadingLive ? 'Syncing Firebase...' : 'Sync with Firebase'}
+          </button>
           <Link to="/admin/campaigns" className="btn btn-sm btn-outline">
             <PlusCircle size={15} /> Create Campaign
           </Link>

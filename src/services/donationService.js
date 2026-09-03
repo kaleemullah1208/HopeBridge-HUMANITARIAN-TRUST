@@ -10,6 +10,25 @@ export const donationService = {
     return getFromStorage(KEYS.DONATIONS, INITIAL_DONATIONS);
   },
 
+  // Fetch live donations from Firestore
+  fetchDonations: async () => {
+    let donations = [...getFromStorage(KEYS.DONATIONS, INITIAL_DONATIONS)];
+    try {
+      const snap = await getDocs(collection(db, 'donations'));
+      if (!snap.empty) {
+        const firestoreDonations = [];
+        snap.forEach((docSnap) => {
+          firestoreDonations.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        saveToStorage(KEYS.DONATIONS, firestoreDonations);
+        return firestoreDonations;
+      }
+    } catch (err) {
+      console.warn('Firestore fetchDonations note:', err);
+    }
+    return donations;
+  },
+
   // Get donation by ID
   getDonationById: (id) => {
     const donations = getFromStorage(KEYS.DONATIONS, INITIAL_DONATIONS);

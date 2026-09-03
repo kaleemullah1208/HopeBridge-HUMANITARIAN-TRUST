@@ -5,10 +5,10 @@ import {
   signOut, 
   updateProfile as updateFirebaseProfile
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, getDocs, collection } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../firebase/config';
 import { getFromStorage, saveToStorage, KEYS } from './storageService';
-import { INITIAL_USERS } from '../data/mockData';
+import { INITIAL_USERS, INITIAL_DONORS, INITIAL_VOLUNTEERS } from '../data/mockData';
 
 // Friendly error message mapper for Firebase Auth error codes
 export const mapFirebaseError = (error) => {
@@ -114,6 +114,14 @@ export const authService = {
 
       if (userData) {
         saveToStorage(KEYS.CURRENT_USER, userData);
+
+        // Also add to local users list
+        const users = getFromStorage(KEYS.USERS, INITIAL_USERS);
+        if (!users.some((u) => u.email?.toLowerCase() === userData.email?.toLowerCase())) {
+          users.unshift(userData);
+          saveToStorage(KEYS.USERS, users);
+        }
+
         return { success: true, user: userData };
       }
 
@@ -166,7 +174,9 @@ export const authService = {
             role: isAdminEmail ? 'Admin' : (defaultRole || 'Donor'),
             avatar: user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
             joinedDate: new Date().toISOString().split('T')[0],
-            phone: user.phoneNumber || '+92 300 0000000'
+            phone: user.phoneNumber || '+92 300 0000000',
+            city: 'Online Registration',
+            createdAt: new Date().toISOString()
           };
           await setDoc(userDocRef, userData);
         }
@@ -179,11 +189,46 @@ export const authService = {
           email: email,
           role: isAdminEmail ? 'Admin' : (defaultRole || 'Donor'),
           avatar: user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
-          joinedDate: new Date().toISOString().split('T')[0]
+          joinedDate: new Date().toISOString().split('T')[0],
+          phone: user.phoneNumber || '+92 300 0000000',
+          city: 'Online Registration'
         };
       }
 
       saveToStorage(KEYS.CURRENT_USER, userData);
+
+      // Save to local users list
+      const users = getFromStorage(KEYS.USERS, INITIAL_USERS);
+      if (!users.some((u) => u.email?.toLowerCase() === userData.email?.toLowerCase())) {
+        users.unshift(userData);
+        saveToStorage(KEYS.USERS, users);
+      }
+
+      // If Volunteer, ensure in volunteer list
+      if (userData.role === 'Volunteer') {
+        const volunteers = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
+        if (!volunteers.some((v) => v.email?.toLowerCase() === userData.email?.toLowerCase())) {
+          const volEntry = {
+            id: `VOL-${uid.slice(0, 4)}`,
+            name: userData.name,
+            email: userData.email,
+            phone: userData.phone,
+            city: userData.city || 'Online',
+            skills: ['General Support'],
+            areaOfInterest: 'General Assistance',
+            availability: 'Flexible',
+            status: 'Pending',
+            appliedDate: userData.joinedDate,
+            hoursContributed: 0
+          };
+          volunteers.unshift(volEntry);
+          saveToStorage(KEYS.VOLUNTEERS, volunteers);
+          try {
+            setDoc(doc(db, 'volunteers', volEntry.id), volEntry);
+          } catch (e) {}
+        }
+      }
+
       return { success: true, user: userData };
     } catch (error) {
       console.error('Google Sign-in error:', error);
@@ -213,7 +258,9 @@ export const authService = {
         role: isAdminEmail ? 'Admin' : (userData.role || 'Donor'),
         avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
         joinedDate: new Date().toISOString().split('T')[0],
-        phone: userData.phone || '+92 300 0000000'
+        phone: userData.phone || '+92 300 0000000',
+        city: 'Registered Online',
+        createdAt: new Date().toISOString()
       };
 
       try {
@@ -224,11 +271,62 @@ export const authService = {
       }
 
       saveToStorage(KEYS.CURRENT_USER, newProfile);
+
+      // Save to local users list
+      const users = getFromStorage(KEYS.USERS, INITIAL_USERS);
+      if (!users.some((u) => u.email?.toLowerCase() === newProfile.email?.toLowerCase())) {
+        users.unshift(newProfile);
+        saveToStorage(KEYS.USERS, users);
+      }
+
+      // If registered as a Volunteer, add them into the volunteer management pipeline
+      if (newProfile.role === 'Volunteer') {
+        const volunteers = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
+        if (!volunteers.some((v) => v.email?.toLowerCase() === newProfile.email?.toLowerCase())) {
+          const volEntry = {
+            id: `VOL-${uid.slice(0, 4)}`,
+            name: newProfile.name,
+            email: newProfile.email,
+            phone: newProfile.phone,
+            city: newProfile.city || 'Online',
+            skills: ['General Support'],
+            areaOfInterest: 'Field Operations',
+            availability: 'Flexible',
+            status: 'Pending',
+            appliedDate: newProfile.joinedDate,
+            hoursContributed: 0
+          };
+          volunteers.unshift(volEntry);
+          saveToStorage(KEYS.VOLUNTEERS, volunteers);
+          try {
+            setDoc(doc(db, 'volunteers', volEntry.id), volEntry);
+          } catch (e) {}
+        }
+      }
+
       return { success: true, user: newProfile };
     } catch (error) {
       console.error('Register error:', error);
       return { success: false, error: mapFirebaseError(error) };
     }
+  },
+
+  // Fetch all registered users from Cloud Firestore
+  getAllUsers: async () => {
+    try {
+      const snap = await getDocs(collection(db, 'users'));
+      if (!snap.empty) {
+        const list = [];
+        snap.forEach((doc) => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
+        saveToStorage(KEYS.USERS, list);
+        return list;
+      }
+    } catch (err) {
+      console.warn('Firestore getAllUsers note:', err);
+    }
+    return getFromStorage(KEYS.USERS, INITIAL_USERS);
   },
 
   // Sign out
@@ -245,22 +343,6 @@ export const authService = {
   // Get current user session
   getCurrentUser: () => {
     return getFromStorage(KEYS.CURRENT_USER, null);
-  },
-
-  // Quick switch role helper for interactive presentation
-  quickSwitchRole: (role) => {
-    const users = getFromStorage(KEYS.USERS, INITIAL_USERS);
-    const target = users.find((u) => u.role === role) || {
-      id: `usr-${role.toLowerCase()}-demo`,
-      name: `Demo ${role}`,
-      email: role === 'Admin' ? 'admin@gmail.com' : `${role.toLowerCase()}@hopebridge.ngo`,
-      role: role,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-      joinedDate: '2026-01-01',
-      phone: '+92 300 1234567'
-    };
-    saveToStorage(KEYS.CURRENT_USER, target);
-    return target;
   },
 
   // Update profile

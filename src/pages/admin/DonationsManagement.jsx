@@ -17,7 +17,8 @@ import {
   AlertCircle, 
   Clock,
   SlidersHorizontal,
-  DollarSign
+  DollarSign,
+  RefreshCw
 } from 'lucide-react';
 
 export const DonationsManagement = () => {
@@ -29,6 +30,7 @@ export const DonationsManagement = () => {
   const [campaignFilter, setCampaignFilter] = useState('All');
   const [paymentMethodFilter, setPaymentMethodFilter] = useState('All');
   const [sortBy, setSortBy] = useState('date-desc');
+  const [loadingLive, setLoadingLive] = useState(false);
   
   // Modals state
   const [selectedReceipt, setSelectedReceipt] = useState(null);
@@ -46,12 +48,18 @@ export const DonationsManagement = () => {
 
   const { showToast } = useToast();
 
-  const loadData = () => {
-    const list = donationService.getDonations();
-    setDonations(list);
+  const loadData = async () => {
+    setDonations(donationService.getDonations());
     setStats(donationService.getDonationStats());
     const campList = campaignService.getCampaigns();
     setCampaigns(campList);
+
+    setLoadingLive(true);
+    const liveDonations = await donationService.fetchDonations();
+    setDonations(liveDonations);
+    setStats(donationService.getDonationStats());
+    setLoadingLive(false);
+
     if (!newDonation.campaignId && campList.length > 0) {
       setNewDonation((prev) => ({ ...prev, campaignId: campList[0].id }));
     }
@@ -162,6 +170,14 @@ export const DonationsManagement = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button 
+            onClick={loadData} 
+            disabled={loadingLive}
+            className="btn btn-sm btn-outline" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <RefreshCw size={15} className={loadingLive ? 'spin' : ''} /> {loadingLive ? 'Syncing Firebase...' : 'Sync with Firebase'}
+          </button>
           <button onClick={handleExportCSV} className="btn btn-sm btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Download size={15} /> Export CSV
           </button>

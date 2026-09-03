@@ -17,7 +17,8 @@ import {
   Mail, 
   Phone, 
   MapPin,
-  Sparkles
+  Sparkles,
+  RefreshCw
 } from 'lucide-react';
 
 export const DonorManagement = () => {
@@ -27,11 +28,16 @@ export const DonorManagement = () => {
   const [selectedDonor, setSelectedDonor] = useState(null);
   const [donorHistory, setDonorHistory] = useState([]);
 
+  const [loadingLive, setLoadingLive] = useState(false);
   const { showToast } = useToast();
 
-  const loadDonors = () => {
-    const list = donorService.getDonors();
-    setDonors(list);
+  const loadDonors = async () => {
+    // Immediate load from cache
+    setDonors(donorService.getDonors());
+    setLoadingLive(true);
+    const liveList = await donorService.fetchDonors();
+    setDonors(liveList);
+    setLoadingLive(false);
   };
 
   useEffect(() => {
@@ -90,9 +96,19 @@ export const DonorManagement = () => {
           </p>
         </div>
 
-        <button onClick={handleExportCSV} className="btn btn-sm btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Download size={15} /> Export Donors CSV
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button 
+            onClick={loadDonors} 
+            disabled={loadingLive}
+            className="btn btn-sm btn-outline" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <RefreshCw size={15} className={loadingLive ? 'spin' : ''} /> {loadingLive ? 'Syncing Firebase...' : 'Sync with Firebase'}
+          </button>
+          <button onClick={handleExportCSV} className="btn btn-sm btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Download size={15} /> Export Donors CSV
+          </button>
+        </div>
       </div>
 
       {/* KPI Stats */}

@@ -4,9 +4,70 @@ import { getFromStorage, saveToStorage, KEYS } from './storageService';
 import { INITIAL_VOLUNTEERS } from '../data/mockData';
 
 export const volunteerService = {
-  // Get all volunteer applications
+  // Get all volunteer applications (from storage)
   getVolunteers: () => {
     return getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
+  },
+
+  // Fetch live volunteers and registered volunteer accounts from Firestore
+  fetchVolunteers: async () => {
+    let combinedVolunteers = [...getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS)];
+    const existingEmails = new Set(combinedVolunteers.map((v) => v.email?.toLowerCase()));
+
+    try {
+      // 1. Fetch from Firestore 'volunteers' collection
+      const volSnap = await getDocs(collection(db, 'volunteers'));
+      if (!volSnap.empty) {
+        volSnap.forEach((docSnap) => {
+          const data = { id: docSnap.id, ...docSnap.data() };
+          const emailLower = data.email?.toLowerCase();
+          const existingIdx = combinedVolunteers.findIndex((v) => v.email?.toLowerCase() === emailLower);
+          if (existingIdx !== -1) {
+            combinedVolunteers[existingIdx] = { ...combinedVolunteers[existingIdx], ...data };
+          } else {
+            combinedVolunteers.unshift(data);
+            if (emailLower) existingEmails.add(emailLower);
+          }
+        });
+      }
+
+      // 2. Fetch from Firestore 'users' collection where role === 'Volunteer'
+      const usersSnap = await getDocs(collection(db, 'users'));
+      if (!usersSnap.empty) {
+        usersSnap.forEach((docSnap) => {
+          const user = { id: docSnap.id, ...docSnap.data() };
+          const emailLower = user.email?.toLowerCase();
+          if (user.role === 'Volunteer' && emailLower && !existingEmails.has(emailLower)) {
+            const volEntry = {
+              id: `VOL-${user.uid ? user.uid.slice(0, 5) : Math.floor(100 + Math.random() * 900)}`,
+              name: user.name || emailLower.split('@')[0],
+              email: user.email,
+              phone: user.phone || '+92 300 0000000',
+              address: '',
+              city: user.city || 'Online Volunteer',
+              skills: ['Community Support', 'Field Aid'],
+              areaOfInterest: 'General Assistance',
+              availability: 'Flexible',
+              experience: 'Registered via Firebase Auth',
+              message: 'Volunteer account created on HopeBridge portal.',
+              status: 'Pending',
+              appliedDate: user.joinedDate || new Date().toISOString().split('T')[0],
+              approvedDate: null,
+              assignedCampaign: null,
+              hoursContributed: 0
+            };
+            combinedVolunteers.unshift(volEntry);
+            existingEmails.add(emailLower);
+          }
+        });
+      }
+
+      saveToStorage(KEYS.VOLUNTEERS, combinedVolunteers);
+      return combinedVolunteers;
+    } catch (err) {
+      console.warn('Firestore fetchVolunteers note:', err);
+      return combinedVolunteers;
+    }
   },
 
   // Get volunteer by ID
