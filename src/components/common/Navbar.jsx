@@ -17,18 +17,9 @@ import {
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
-  const { currentUser, logout, switchRole, isAdmin } = useAuth();
+  const { currentUser, logout, isAdmin } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
-
-  const handleRoleSwitch = (role) => {
-    switchRole(role);
-    setRoleDropdownOpen(false);
-    showToast('Role Switched', `Active demo mode changed to ${role}.`, 'info');
-    if (role === 'Admin') {
-      navigate('/admin');
-    }
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -58,67 +49,24 @@ export const Navbar = () => {
       borderBottom: '1px solid var(--border-light)',
       boxShadow: '0 2px 10px rgba(15, 23, 42, 0.04)'
     }}>
-      {/* Top Notification Bar for Demo convenience */}
+      {/* Top Notification Bar */}
       <div style={{
         background: 'linear-gradient(90deg, #0F172A 0%, #1E293B 100%)',
         color: '#F8FAFC',
         fontSize: '0.8rem',
-        padding: '0.35rem 1rem',
+        padding: '0.4rem 1rem',
         textAlign: 'center',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '0.75rem',
+        gap: '1rem',
         flexWrap: 'wrap'
       }}>
-        <span>🇵🇰 Tax-Exempt Non-Profit Reg # <strong>PB/2021/9842</strong> | Emergency Relief Helpline: <strong>+92 (42) 3588-4422</strong></span>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginLeft: '0.5rem' }}>
-          <span style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '2px', fontWeight: '600' }}>
-            <Sparkles size={13} /> Demo Role:
-          </span>
-          <button 
-            onClick={() => handleRoleSwitch('Admin')} 
-            style={{
-              background: currentUser?.role === 'Admin' ? 'var(--primary)' : 'rgba(255,255,255,0.15)',
-              border: 'none',
-              color: '#FFF',
-              padding: '2px 8px',
-              borderRadius: '4px',
-              fontSize: '0.75rem',
-              cursor: 'pointer'
-            }}
-          >
-            Admin
-          </button>
-          <button 
-            onClick={() => handleRoleSwitch('Donor')} 
-            style={{
-              background: currentUser?.role === 'Donor' ? 'var(--primary)' : 'rgba(255,255,255,0.15)',
-              border: 'none',
-              color: '#FFF',
-              padding: '2px 8px',
-              borderRadius: '4px',
-              fontSize: '0.75rem',
-              cursor: 'pointer'
-            }}
-          >
-            Donor
-          </button>
-          <button 
-            onClick={() => handleRoleSwitch('Volunteer')} 
-            style={{
-              background: currentUser?.role === 'Volunteer' ? 'var(--primary)' : 'rgba(255,255,255,0.15)',
-              border: 'none',
-              color: '#FFF',
-              padding: '2px 8px',
-              borderRadius: '4px',
-              fontSize: '0.75rem',
-              cursor: 'pointer'
-            }}
-          >
-            Volunteer
-          </button>
-        </div>
+        <span>🇵🇰 Tax-Exempt Non-Profit Reg # <strong>PB/2021/9842</strong></span>
+        <span>•</span>
+        <span>Emergency Relief Helpline: <strong>+92 (42) 3588-4422</strong></span>
+        <span>•</span>
+        <span>Official Portal: <strong>HopeBridge Humanitarian Trust</strong></span>
       </div>
 
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>

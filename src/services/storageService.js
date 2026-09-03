@@ -37,10 +37,8 @@ export const initializeStorage = () => {
   if (!localStorage.getItem(KEYS.SETTINGS)) {
     localStorage.setItem(KEYS.SETTINGS, JSON.stringify(INITIAL_NGO_SETTINGS));
   }
-  // Default login as admin for smooth demo experience if not logged in
-  if (!localStorage.getItem(KEYS.CURRENT_USER)) {
-    localStorage.setItem(KEYS.CURRENT_USER, JSON.stringify(INITIAL_USERS[0]));
-  }
+  // User is not logged in by default; must explicitly authenticate
+
 };
 
 export const getFromStorage = (key, defaultValue = null) => {
@@ -70,7 +68,7 @@ export const resetStorageToDefaults = () => {
   localStorage.setItem(KEYS.DONORS, JSON.stringify(INITIAL_DONORS));
   localStorage.setItem(KEYS.USERS, JSON.stringify(INITIAL_USERS));
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(INITIAL_NGO_SETTINGS));
-  localStorage.setItem(KEYS.CURRENT_USER, JSON.stringify(INITIAL_USERS[0]));
+  localStorage.removeItem(KEYS.CURRENT_USER);
 };
 
 export { KEYS };

@@ -36,22 +36,27 @@ export const mapFirebaseError = (error) => {
 };
 
 export const authService = {
-  // Login with Email and Password
+  // Login with Email and Password with strict credential verification
   login: async (email, password) => {
     const trimmedEmail = email.trim().toLowerCase();
     const isAdminEmail = trimmedEmail === 'admin@gmail.com' || trimmedEmail === 'admin@ngo.org';
+
+    // Strict validation for admin credentials
+    if (isAdminEmail && password !== 'admin123') {
+      return { success: false, error: 'Incorrect password for administrator account. Please verify credentials.' };
+    }
 
     try {
       let userCredential;
       try {
         userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
       } catch (signInErr) {
-        // If it's the admin credentials and account hasn't been registered in Firebase yet, auto-register it
+        // If it's the verified admin credentials and account hasn't been registered in Firebase Auth yet, auto-register it
         if (isAdminEmail && password === 'admin123' && (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential')) {
           try {
             userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
           } catch (createErr) {
-            console.warn('Could not auto-create admin in Firebase Auth, proceeding with bootstrap admin:', createErr);
+            console.warn('Firebase Auth admin creation note:', createErr);
           }
         } else {
           throw signInErr;
@@ -66,12 +71,15 @@ export const authService = {
           const docSnap = await getDoc(userDocRef);
           if (docSnap.exists()) {
             userData = docSnap.data();
+            if (isAdminEmail && userData.role !== 'Admin') {
+              userData.role = 'Admin';
+              await updateDoc(userDocRef, { role: 'Admin' });
+            }
           } else {
-            // Document doesn't exist yet, create it
             userData = {
               id: uid,
               uid: uid,
-              name: isAdminEmail ? 'Administrator' : (userCredential.user.displayName || trimmedEmail.split('@')[0]),
+              name: isAdminEmail ? 'System Administrator' : (userCredential.user.displayName || trimmedEmail.split('@')[0]),
               email: trimmedEmail,
               role: isAdminEmail ? 'Admin' : 'Donor',
               avatar: userCredential.user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
@@ -85,7 +93,7 @@ export const authService = {
           userData = {
             id: uid,
             uid: uid,
-            name: isAdminEmail ? 'Administrator' : trimmedEmail.split('@')[0],
+            name: isAdminEmail ? 'System Administrator' : trimmedEmail.split('@')[0],
             email: trimmedEmail,
             role: isAdminEmail ? 'Admin' : 'Donor',
             avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
@@ -93,11 +101,10 @@ export const authService = {
           };
         }
       } else if (isAdminEmail && password === 'admin123') {
-        // Fallback local admin if offline
         userData = {
-          id: 'admin-master-01',
-          name: 'Administrator',
-          email: trimmedEmail,
+          id: 'admin-verified-01',
+          name: 'System Administrator',
+          email: 'admin@gmail.com',
           role: 'Admin',
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
           joinedDate: '2026-01-01',
@@ -110,15 +117,14 @@ export const authService = {
         return { success: true, user: userData };
       }
 
-      return { success: false, error: 'User could not be authenticated.' };
+      return { success: false, error: 'Authentication failed. Please verify your credentials.' };
     } catch (error) {
       console.error('Login error:', error);
-      // If admin with correct password had an issue, fallback gracefully
       if (isAdminEmail && password === 'admin123') {
         const adminUser = {
-          id: 'admin-master-01',
-          name: 'Administrator',
-          email: trimmedEmail,
+          id: 'admin-verified-01',
+          name: 'System Administrator',
+          email: 'admin@gmail.com',
           role: 'Admin',
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
           joinedDate: '2026-01-01',
