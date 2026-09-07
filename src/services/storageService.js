@@ -4,7 +4,8 @@ import {
   INITIAL_VOLUNTEERS,
   INITIAL_DONORS,
   INITIAL_USERS,
-  INITIAL_NGO_SETTINGS
+  INITIAL_NGO_SETTINGS,
+  INITIAL_AID_REQUESTS
 } from '../data/mockData';
 
 const KEYS = {
@@ -15,7 +16,8 @@ const KEYS = {
   USERS: 'givehope_users',
   CURRENT_USER: 'givehope_current_user',
   SETTINGS: 'givehope_settings',
-  ACTIVITIES: 'givehope_activities'
+  ACTIVITIES: 'givehope_activities',
+  AID_REQUESTS: 'givehope_aid_requests'
 };
 
 const LEGACY_KEYS = {
@@ -59,6 +61,9 @@ export const initializeStorage = () => {
   if (!localStorage.getItem(KEYS.SETTINGS)) {
     localStorage.setItem(KEYS.SETTINGS, JSON.stringify(INITIAL_NGO_SETTINGS));
   }
+  if (!localStorage.getItem(KEYS.AID_REQUESTS)) {
+    localStorage.setItem(KEYS.AID_REQUESTS, JSON.stringify(INITIAL_AID_REQUESTS));
+  }
 };
 
 export const getFromStorage = (key, defaultValue = null) => {
@@ -95,6 +100,7 @@ export const resetStorageToDefaults = () => {
   localStorage.setItem(KEYS.DONORS, JSON.stringify(INITIAL_DONORS));
   localStorage.setItem(KEYS.USERS, JSON.stringify(INITIAL_USERS));
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(INITIAL_NGO_SETTINGS));
+  localStorage.setItem(KEYS.AID_REQUESTS, JSON.stringify(INITIAL_AID_REQUESTS));
   localStorage.removeItem(KEYS.CURRENT_USER);
 };
 

@@ -131,12 +131,15 @@ export const Home = () => {
               </p>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', paddingTop: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', paddingTop: '0.5rem' }}>
                 <Link to="/donate" className="btn btn-lg btn-accent" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '700' }}>
                   <Heart size={20} fill="#FFFFFF" /> Donate Now
                 </Link>
                 <Link to="/volunteer" className="btn btn-lg btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.12)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.25)' }}>
-                  <HandHeart size={20} color="#14B8A6" /> Become a Volunteer
+                  <HandHeart size={20} color="#14B8A6" /> Volunteer
+                </Link>
+                <Link to="/request-aid" className="btn btn-lg" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#A7F3D0', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+                  <span>Apply for Aid</span> <ArrowRight size={18} />
                 </Link>
               </div>
 

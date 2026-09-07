@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { volunteerService } from '../services/volunteerService';
 import { donationService } from '../services/donationService';
+import { aidRequestService } from '../services/aidRequestService';
 import { 
   LayoutDashboard, 
   HeartHandshake, 
@@ -20,13 +21,16 @@ import {
   ExternalLink, 
   ChevronRight,
   ShieldCheck,
-  Search
+  Search,
+  Wallet,
+  Receipt
 } from 'lucide-react';
 
 export const AdminLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [pendingVolunteersCount, setPendingVolunteersCount] = useState(0);
+  const [pendingAidCount, setPendingAidCount] = useState(0);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   
   const { currentUser, logout } = useAuth();
@@ -35,9 +39,21 @@ export const AdminLayout = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const vStats = volunteerService.getVolunteerStats();
-    setPendingVolunteersCount(vStats.pending);
-  }, [location.pathname]);
+    const unsubVol = volunteerService.subscribeVolunteers((vols) => {
+      const vStats = volunteerService.getVolunteerStats(vols);
+      setPendingVolunteersCount(vStats.pending);
+    });
+
+    const unsubAid = aidRequestService.subscribeAidRequests((requests) => {
+      const aStats = aidRequestService.getAidRequestStats(requests);
+      setPendingAidCount(aStats.pending);
+    });
+
+    return () => {
+      unsubVol();
+      unsubAid();
+    };
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -47,7 +63,8 @@ export const AdminLayout = () => {
 
   const navItems = [
     { label: 'Dashboard', path: '/admin', icon: LayoutDashboard, exact: true },
-    { label: 'Donation Ledger', path: '/admin/donations', icon: HeartHandshake },
+    { label: 'Donation Ledger', path: '/admin/donations', icon: Wallet },
+    { label: 'Aid Requests', path: '/admin/aid-requests', icon: HeartHandshake, badge: pendingAidCount },
     { label: 'Volunteer Management', path: '/admin/volunteers', icon: HandHeart, badge: pendingVolunteersCount },
     { label: 'Campaigns & Projects', path: '/admin/campaigns', icon: Megaphone },
     { label: 'Donor Directory', path: '/admin/donors', icon: Users },

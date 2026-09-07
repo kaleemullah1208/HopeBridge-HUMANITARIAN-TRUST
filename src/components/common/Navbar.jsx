@@ -11,13 +11,17 @@ import {
   LogOut, 
   HandHeart, 
   Sparkles,
-  ChevronDown
+  ChevronDown,
+  HeartHandshake,
+  FileText,
+  CalendarCheck,
+  PlusCircle
 } from 'lucide-react';
 
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
-  const { currentUser, logout, isAdmin } = useAuth();
+  const { currentUser, logout, isAdmin, isVolunteer, isDonor, isBeneficiary } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -96,12 +100,15 @@ export const Navbar = () => {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '1rem' }} className="desktop-nav">
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="desktop-nav">
           <NavLink to="/" style={navLinkStyle}>Home</NavLink>
           <NavLink to="/about" style={navLinkStyle}>About</NavLink>
           <NavLink to="/campaigns" style={navLinkStyle}>Campaigns</NavLink>
           <NavLink to="/volunteer" style={navLinkStyle}>
-            <HandHeart size={16} color="var(--primary)" /> Volunteers
+            <HandHeart size={16} color="var(--primary)" /> {isVolunteer ? 'My Volunteer Hub' : 'Volunteers'}
+          </NavLink>
+          <NavLink to="/request-aid" style={navLinkStyle}>
+            <HeartHandshake size={16} color="#0D9488" /> Request Aid
           </NavLink>
           <NavLink to="/contact" style={navLinkStyle}>Contact</NavLink>
         </nav>
@@ -114,9 +121,20 @@ export const Navbar = () => {
             </Link>
           )}
 
-          <Link to="/donate" className="btn btn-sm btn-accent" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Heart size={15} fill="#FFFFFF" /> Donate Now
-          </Link>
+          {/* Conditional Primary CTA based on user role */}
+          {isVolunteer ? (
+            <Link to="/volunteer" className="btn btn-sm btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <CalendarCheck size={15} /> Field Drives
+            </Link>
+          ) : isBeneficiary ? (
+            <Link to="/my-aid-requests" className="btn btn-sm btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <FileText size={15} /> My Aid Status
+            </Link>
+          ) : (
+            <Link to="/donate" className="btn btn-sm btn-accent" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Heart size={15} fill="#FFFFFF" /> Donate Now
+            </Link>
+          )}
 
           {currentUser ? (
             <div style={{ position: 'relative' }}>
@@ -141,7 +159,7 @@ export const Navbar = () => {
                   style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover' }}
                 />
                 <span>{currentUser.name.split(' ')[0]}</span>
-                <span className="badge badge-primary" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>{currentUser.role}</span>
+                <span className="badge badge-primary" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>{currentUser.role || 'Member'}</span>
                 <ChevronDown size={14} />
               </button>
 
@@ -161,7 +179,9 @@ export const Navbar = () => {
                   <div style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                     <div style={{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--navy)' }}>{currentUser.name}</div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{currentUser.email}</div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--primary)', fontWeight: '600', marginTop: '2px' }}>Role: {currentUser.role || 'Donor'}</div>
                   </div>
+
                   {isAdmin && (
                     <Link
                       to="/admin"
@@ -180,6 +200,45 @@ export const Navbar = () => {
                       <ShieldAlert size={16} /> Admin Dashboard
                     </Link>
                   )}
+
+                  {isBeneficiary && (
+                    <Link
+                      to="/my-aid-requests"
+                      onClick={() => setRoleDropdownOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 0.75rem',
+                        fontSize: '0.88rem',
+                        color: 'var(--navy)',
+                        borderRadius: 'var(--radius-sm)',
+                        fontWeight: '600'
+                      }}
+                    >
+                      <FileText size={16} /> My Aid Applications
+                    </Link>
+                  )}
+
+                  {isVolunteer && (
+                    <Link
+                      to="/volunteer"
+                      onClick={() => setRoleDropdownOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 0.75rem',
+                        fontSize: '0.88rem',
+                        color: 'var(--navy)',
+                        borderRadius: 'var(--radius-sm)',
+                        fontWeight: '600'
+                      }}
+                    >
+                      <HandHeart size={16} /> Volunteer Dashboard
+                    </Link>
+                  )}
+
                   <button
                     onClick={handleLogout}
                     style={{
@@ -240,14 +299,34 @@ export const Navbar = () => {
           <NavLink to="/" onClick={() => setMobileMenuOpen(false)} style={navLinkStyle}>Home</NavLink>
           <NavLink to="/about" onClick={() => setMobileMenuOpen(false)} style={navLinkStyle}>About</NavLink>
           <NavLink to="/campaigns" onClick={() => setMobileMenuOpen(false)} style={navLinkStyle}>Campaigns</NavLink>
-          <NavLink to="/volunteer" onClick={() => setMobileMenuOpen(false)} style={navLinkStyle}>Volunteers</NavLink>
+          <NavLink to="/volunteer" onClick={() => setMobileMenuOpen(false)} style={navLinkStyle}>
+            <HandHeart size={16} color="var(--primary)" /> {isVolunteer ? 'My Volunteer Hub' : 'Volunteers'}
+          </NavLink>
+          <NavLink to="/request-aid" onClick={() => setMobileMenuOpen(false)} style={navLinkStyle}>
+            <HeartHandshake size={16} color="#0D9488" /> Request Aid
+          </NavLink>
+          {isBeneficiary && (
+            <NavLink to="/my-aid-requests" onClick={() => setMobileMenuOpen(false)} style={navLinkStyle}>
+              <FileText size={16} /> My Aid Status
+            </NavLink>
+          )}
           <NavLink to="/contact" onClick={() => setMobileMenuOpen(false)} style={navLinkStyle}>Contact</NavLink>
           
           <div style={{ height: '1px', backgroundColor: 'var(--border-light)', margin: '0.5rem 0' }} />
 
-          <Link to="/donate" onClick={() => setMobileMenuOpen(false)} className="btn btn-accent" style={{ justifyContent: 'center' }}>
-            <Heart size={16} fill="#FFFFFF" /> Donate Now
-          </Link>
+          {isVolunteer ? (
+            <Link to="/volunteer" onClick={() => setMobileMenuOpen(false)} className="btn btn-primary" style={{ justifyContent: 'center' }}>
+              <CalendarCheck size={16} /> Volunteer Drives
+            </Link>
+          ) : isBeneficiary ? (
+            <Link to="/my-aid-requests" onClick={() => setMobileMenuOpen(false)} className="btn btn-primary" style={{ justifyContent: 'center' }}>
+              <FileText size={16} /> View My Aid Requests
+            </Link>
+          ) : (
+            <Link to="/donate" onClick={() => setMobileMenuOpen(false)} className="btn btn-accent" style={{ justifyContent: 'center' }}>
+              <Heart size={16} fill="#FFFFFF" /> Donate Now
+            </Link>
+          )}
 
           {isAdmin && (
             <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="btn btn-secondary" style={{ justifyContent: 'center' }}>

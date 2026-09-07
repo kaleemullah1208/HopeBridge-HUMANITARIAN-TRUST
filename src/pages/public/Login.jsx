@@ -50,9 +50,14 @@ export const Login = () => {
     setSubmitting(false);
 
     if (res.success) {
-      showToast('Welcome Back!', `Signed in as ${res.user.name} (${res.user.role}).`, 'success');
-      if (res.user.role === 'Admin' || email.toLowerCase() === 'admin@gmail.com') {
+      showToast('Welcome Back!', `Signed in as ${res.user.name} (${res.user.role || 'Member'}).`, 'success');
+      const userRole = res.user.role;
+      if (userRole === 'Admin' || email.toLowerCase() === 'admin@gmail.com' || email.toLowerCase() === 'admin@givehope.ngo') {
         navigate('/admin');
+      } else if (userRole === 'Beneficiary') {
+        navigate('/my-aid-requests');
+      } else if (userRole === 'Volunteer') {
+        navigate('/volunteer');
       } else {
         navigate('/');
       }
@@ -68,8 +73,13 @@ export const Login = () => {
 
     if (res.success) {
       showToast('Google Sign-In Successful', `Welcome, ${res.user.name}!`, 'success');
-      if (res.user.role === 'Admin' || res.user.email?.toLowerCase() === 'admin@gmail.com') {
+      const userRole = res.user.role;
+      if (userRole === 'Admin' || res.user.email?.toLowerCase() === 'admin@gmail.com' || res.user.email?.toLowerCase() === 'admin@givehope.ngo') {
         navigate('/admin');
+      } else if (userRole === 'Beneficiary') {
+        navigate('/my-aid-requests');
+      } else if (userRole === 'Volunteer') {
+        navigate('/volunteer');
       } else {
         navigate('/');
       }

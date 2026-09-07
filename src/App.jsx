@@ -12,6 +12,8 @@ import { Campaigns } from './pages/public/Campaigns';
 import { CampaignDetails } from './pages/public/CampaignDetails';
 import { Volunteer } from './pages/public/Volunteer';
 import { Donate } from './pages/public/Donate';
+import { RequestAid } from './pages/public/RequestAid';
+import { MyAidRequests } from './pages/public/MyAidRequests';
 import { Contact } from './pages/public/Contact';
 import { Login } from './pages/public/Login';
 import { Register } from './pages/public/Register';
@@ -20,6 +22,7 @@ import { NotFound } from './pages/public/NotFound';
 // Admin Pages
 import { DashboardHome } from './pages/admin/DashboardHome';
 import { DonationsManagement } from './pages/admin/DonationsManagement';
+import { AidRequestsManagement } from './pages/admin/AidRequestsManagement';
 import { VolunteerManagement } from './pages/admin/VolunteerManagement';
 import { CampaignManagement } from './pages/admin/CampaignManagement';
 import { DonorManagement } from './pages/admin/DonorManagement';
@@ -55,6 +58,8 @@ export const App = () => {
       <Route path="/campaigns/:id" element={<PublicLayout><CampaignDetails /></PublicLayout>} />
       <Route path="/volunteer" element={<PublicLayout><Volunteer /></PublicLayout>} />
       <Route path="/donate" element={<PublicLayout><Donate /></PublicLayout>} />
+      <Route path="/request-aid" element={<PublicLayout><RequestAid /></PublicLayout>} />
+      <Route path="/my-aid-requests" element={<PublicLayout><MyAidRequests /></PublicLayout>} />
       <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
       <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
       <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
@@ -70,6 +75,7 @@ export const App = () => {
       >
         <Route index element={<DashboardHome />} />
         <Route path="donations" element={<DonationsManagement />} />
+        <Route path="aid-requests" element={<AidRequestsManagement />} />
         <Route path="volunteers" element={<VolunteerManagement />} />
         <Route path="campaigns" element={<CampaignManagement />} />
         <Route path="donors" element={<DonorManagement />} />

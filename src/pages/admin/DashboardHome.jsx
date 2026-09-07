@@ -10,6 +10,7 @@ import { donationService } from '../../services/donationService';
 import { volunteerService } from '../../services/volunteerService';
 import { campaignService } from '../../services/campaignService';
 import { donorService } from '../../services/donorService';
+import { aidRequestService } from '../../services/aidRequestService';
 import { activityService } from '../../services/activityService';
 import { useToast } from '../../context/ToastContext';
 import { 
@@ -34,7 +35,9 @@ import {
   Radio,
   Sparkles,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  HeartHandshake,
+  Coins
 } from 'lucide-react';
 import { MONTHLY_ANALYTICS_DATA, CATEGORY_DISTRIBUTION } from '../../data/mockData';
 
@@ -47,6 +50,7 @@ export const DashboardHome = () => {
   const [volunteers, setVolunteers] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [donors, setDonors] = useState([]);
+  const [aidRequests, setAidRequests] = useState([]);
   const [activities, setActivities] = useState([]);
 
   // Computed Real-time Stats
@@ -63,6 +67,14 @@ export const DashboardHome = () => {
     pending: 0, 
     rejected: 0 
   });
+  const [aidStats, setAidStats] = useState({
+    total: 0,
+    pending: 0,
+    underReview: 0,
+    approved: 0,
+    disbursed: 0,
+    totalDisbursedAmount: 0
+  });
   const [activeCampaignsCount, setActiveCampaignsCount] = useState(0);
   const [completedCampaignsCount, setCompletedCampaignsCount] = useState(0);
 
@@ -77,6 +89,7 @@ export const DashboardHome = () => {
     let unsubVolunteers = () => {};
     let unsubCampaigns = () => {};
     let unsubDonors = () => {};
+    let unsubAid = () => {};
     let unsubActivities = () => {};
 
     try {
@@ -98,7 +111,14 @@ export const DashboardHome = () => {
         console.warn('Volunteers listener note:', err);
       });
 
-      // 3. Subscribe to Live Campaigns
+      // 3. Subscribe to Live Aid Requests
+      unsubAid = aidRequestService.subscribeAidRequests((liveAid) => {
+        setAidRequests(liveAid);
+        setAidStats(aidRequestService.getAidRequestStats(liveAid));
+        setInitialLoading(false);
+      });
+
+      // 4. Subscribe to Live Campaigns
       unsubCampaigns = campaignService.subscribeCampaigns((liveCampaigns) => {
         setCampaigns(liveCampaigns);
         setActiveCampaignsCount(liveCampaigns.filter((c) => c.status === 'Active').length);
@@ -108,12 +128,12 @@ export const DashboardHome = () => {
         console.warn('Campaigns listener note:', err);
       });
 
-      // 4. Subscribe to Live Donors
+      // 5. Subscribe to Live Donors
       unsubDonors = donorService.subscribeDonors((liveDonors) => {
         setDonors(liveDonors);
       });
 
-      // 5. Subscribe to Live Activities
+      // 6. Subscribe to Live Activities
       unsubActivities = activityService.subscribeActivities((liveActivities) => {
         setActivities(liveActivities);
       });
@@ -127,6 +147,7 @@ export const DashboardHome = () => {
     return () => {
       unsubDonations();
       unsubVolunteers();
+      unsubAid();
       unsubCampaigns();
       unsubDonors();
       unsubActivities();
@@ -266,55 +287,76 @@ export const DashboardHome = () => {
         )}
       </div>
 
-      {/* Secondary 3 Operational Metrics Bar */}
-      <div className="grid grid-cols-3 gap-6">
+      {/* Secondary Operational Metrics Bar */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {initialLoading ? (
           <>
+            <SkeletonCard height="100px" />
             <SkeletonCard height="100px" />
             <SkeletonCard height="100px" />
             <SkeletonCard height="100px" />
           </>
         ) : (
           <>
-            <div className="card" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>
-                  Pending Volunteers
-                </span>
-                <div style={{ fontSize: '1.5rem', fontWeight: '800', color: volunteerStats.pending > 0 ? '#D97706' : 'var(--navy)', marginTop: '0.2rem' }}>
-                  {volunteerStats.pending} <span style={{ fontSize: '0.82rem', fontWeight: '500', color: 'var(--text-muted)' }}>awaiting review</span>
+            <Link to="/admin/volunteers" style={{ textDecoration: 'none' }}>
+              <div className="card" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
+                <div>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>
+                    Pending Volunteers
+                  </span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: '800', color: volunteerStats.pending > 0 ? '#D97706' : 'var(--navy)', marginTop: '0.2rem' }}>
+                    {volunteerStats.pending} <span style={{ fontSize: '0.78rem', fontWeight: '500', color: 'var(--text-muted)' }}>cases</span>
+                  </div>
+                </div>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Clock size={18} />
                 </div>
               </div>
-              <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Clock size={20} />
-              </div>
-            </div>
+            </Link>
 
-            <div className="card" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>
-                  Active Relief Campaigns
-                </span>
-                <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.2rem' }}>
-                  {activeCampaignsCount} <span style={{ fontSize: '0.82rem', fontWeight: '500', color: 'var(--text-muted)' }}>missions live</span>
+            <Link to="/admin/aid-requests" style={{ textDecoration: 'none' }}>
+              <div className="card" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%', borderLeft: '3px solid #0D9488' }}>
+                <div>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>
+                    Aid Requests (Pending)
+                  </span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: '800', color: aidStats.pending > 0 ? '#0D9488' : 'var(--navy)', marginTop: '0.2rem' }}>
+                    {aidStats.pending} <span style={{ fontSize: '0.78rem', fontWeight: '500', color: 'var(--text-muted)' }}>welfare cases</span>
+                  </div>
+                </div>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#CCFBF1', color: '#0F766E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <HeartHandshake size={18} />
                 </div>
               </div>
-              <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Megaphone size={20} />
-              </div>
-            </div>
+            </Link>
 
-            <div className="card" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>
-                  Completed Campaigns
-                </span>
-                <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#059669', marginTop: '0.2rem' }}>
-                  {completedCampaignsCount} <span style={{ fontSize: '0.82rem', fontWeight: '500', color: 'var(--text-muted)' }}>goals achieved</span>
+            <Link to="/admin/campaigns" style={{ textDecoration: 'none' }}>
+              <div className="card" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
+                <div>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>
+                    Active Campaigns
+                  </span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.2rem' }}>
+                    {activeCampaignsCount} <span style={{ fontSize: '0.78rem', fontWeight: '500', color: 'var(--text-muted)' }}>missions</span>
+                  </div>
+                </div>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Megaphone size={18} />
                 </div>
               </div>
-              <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#ECFDF5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CheckCircle2 size={20} />
+            </Link>
+
+            <div className="card" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
+              <div>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>
+                  Completed Goals
+                </span>
+                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#059669', marginTop: '0.2rem' }}>
+                  {completedCampaignsCount} <span style={{ fontSize: '0.78rem', fontWeight: '500', color: 'var(--text-muted)' }}>campaigns</span>
+                </div>
+              </div>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#ECFDF5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckCircle2 size={18} />
               </div>
             </div>
           </>

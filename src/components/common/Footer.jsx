@@ -104,6 +104,11 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/request-aid" style={{ color: '#94A3B8', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ArrowRight size={14} color="var(--primary)" /> Apply for Aid / Welfare
+                </Link>
+              </li>
+              <li>
                 <Link to="/donate" style={{ color: '#94A3B8', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <ArrowRight size={14} color="var(--primary)" /> Make a Donation
                 </Link>

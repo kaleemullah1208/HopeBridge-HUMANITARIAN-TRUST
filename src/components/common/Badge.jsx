@@ -7,10 +7,12 @@ export const Badge = ({ variant = 'primary', children, style, className = '' }) 
       case 'Completed':
       case 'Approved':
       case 'Active':
+      case 'Disbursed':
         return 'badge-success';
       case 'warning':
       case 'Pending':
       case 'Urgent':
+      case 'Under Review':
         return 'badge-warning';
       case 'danger':
       case 'Failed':
@@ -18,6 +20,8 @@ export const Badge = ({ variant = 'primary', children, style, className = '' }) 
         return 'badge-danger';
       case 'info':
       case 'Monthly':
+      case 'Medical Aid':
+      case 'Education':
         return 'badge-info';
       default:
         return 'badge-primary';

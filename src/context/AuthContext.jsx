@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
           
           let profile;
           const email = firebaseUser.email ? firebaseUser.email.toLowerCase() : '';
-          const isAdminEmail = email === 'admin@gmail.com' || email === 'admin@ngo.org';
+          const isAdminEmail = email === 'admin@gmail.com' || email === 'admin@ngo.org' || email === 'admin@givehope.ngo';
 
           if (docSnap.exists()) {
             profile = docSnap.data();
@@ -121,9 +121,10 @@ export const AuthProvider = ({ children }) => {
     logout,
     switchRole,
     updateProfile,
-    isAdmin: currentUser?.role === 'Admin' || currentUser?.email?.toLowerCase() === 'admin@gmail.com' || currentUser?.email?.toLowerCase() === 'admin@ngo.org',
+    isAdmin: currentUser?.role === 'Admin' || currentUser?.email?.toLowerCase() === 'admin@gmail.com' || currentUser?.email?.toLowerCase() === 'admin@ngo.org' || currentUser?.email?.toLowerCase() === 'admin@givehope.ngo',
     isVolunteer: currentUser?.role === 'Volunteer',
     isDonor: currentUser?.role === 'Donor',
+    isBeneficiary: currentUser?.role === 'Beneficiary',
     isAuthenticated: !!currentUser
   };
 

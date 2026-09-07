@@ -29,7 +29,7 @@ The application is built using **React.js**, **Vite**, **Firebase Authentication
 
 ## 🌟 Key Features
 
-### 🌐 Public Website
+### 🌐 Public Website & Portals
 
 1. **Home Page (`/`)**:
    - Hero section with humanitarian messaging: *"Together We Can Make a Difference"*.
@@ -37,35 +37,22 @@ The application is built using **React.js**, **Vite**, **Firebase Authentication
    - Urgent & Featured Campaigns cards with live progress bars and quick donation triggers.
    - **4 Pillars of GiveHope**: Emergency Disaster Relief, Mobile Medical Camps, Child Education & Meals, Solar Water Wells.
    - **Live Supporter Wall**: Real-time ticker of recent contributions.
-   - Interactive Volunteer callout banner.
+   - Direct CTA buttons tailored for Donors, Volunteers, and Welfare Help-Seekers.
 
-2. **About Us Page (`/about`)**:
-   - Mission, Vision, and 4 Core Values (*100% Transparency, Human Dignity First, Rapid Emergency Action, Sustainable Impact*).
-   - **Financial Stewardship & Audit Ratios**: 91% Direct Program Aid, 5% Logistics & Transport, 4% Admin & Audit.
-   - Legal certifications: Govt Punjab Non-Profit Reg `PB/2021/9842`, FBR Income Tax Ordinance Sec. 61 & 2(36) Tax-Deductible, Sharia Zakat Compliant.
-   - Executive Leadership & Field Coordinators directory.
-   - Historical milestone timeline from 2021 inception to 2026 expansion.
+2. **Beneficiary & Aid Request Portal (`/request-aid` & `/my-aid-requests`)**:
+   - **Public Aid Application Form (`/request-aid`)**:
+     - Categories: *Medical & Healthcare, Food & Monthly Ration, Education & School Fees, Emergency Financial Relief*.
+     - Verification Details: Full Name, Active WhatsApp, CNIC / National ID (`35201-XXXXXXX-X`), Residential Address, Amount Needed (PKR), Statement of Need, and Supporting Document Drive/Proof link.
+     - Generates unique tracking Reference ID (`AID-XXXX`).
+   - **Beneficiary Case Tracker (`/my-aid-requests`)**:
+     - Real-time 4-step progress timeline: `Submitted (1)` ➔ `Under Review & Field Verification (2)` ➔ `Approved & Allocated (3)` ➔ `Disbursed & Settled (4)`.
+     - Displays GiveHope administration remarks and disbursal confirmation.
 
-3. **Campaigns Catalog (`/campaigns`)**:
-   - Category filtering (*Disaster Relief, Education, Healthcare, Seasonal Relief, Infrastructure, Food Security*).
-   - Status filtering (*All, Urgent Appeals Only, Active, Completed*).
-   - Live search input & sorting (*Most Urgent, Highest Raised, Highest Goal*).
-   - Rich interactive campaign cards with donor count badges, locations, and progress tracking.
+3. **Volunteer Hub & Member Portal (`/volunteer`)**:
+   - Interactive application form with multi-select skills, availability schedule, and instant reference ID (`VOL-XXX`).
+   - For logged-in verified volunteers, renders the **Active Volunteer Member Hub** with logged service hours, skills badges, and upcoming field operation drives.
 
-4. **Campaign Details (`/campaigns/:id`)**:
-   - Hero banner, location, beneficiaries count, and countdown timeline.
-   - Full narrative with humanitarian field story.
-   - Transparent fund allocation percentage breakdown.
-   - Live campaign donor wall.
-   - Sticky Quick Donation Widget with presets (Rs. 1,000 – 50,000 + Custom) and direct checkout.
-   - Share button with clipboard copy toast.
-
-5. **Volunteer Portal (`/volunteer`)**:
-   - Benefits of volunteering, field roles, and verified hours certification.
-   - Multi-field interactive application form with multi-select skills, availability schedule, experience, motivation statement, and validation.
-   - Confetti feedback and instant reference ID (`VOL-XXX`) generation.
-
-6. **Donation Station (`/donate`)**:
+4. **Donation Station (`/donate`)**:
    - Multi-step donation experience:
      1. Campaign selection & Giving Frequency (*One-Time* vs *Monthly Recurring*).
      2. Preset Amounts (*Rs. 500, Rs. 1,000, Rs. 2,500, Rs. 5,000, Rs. 10,000, Rs. 25,000, Rs. 50,000, or Custom*).
@@ -73,31 +60,50 @@ The application is built using **React.js**, **Vite**, **Firebase Authentication
      4. Simulated Payment Methods (*JazzCash, EasyPaisa, Debit/Credit Cards, Direct Bank Wire*).
    - Generates an official, printable/downloadable **Tax-Exempt Donation Receipt** with unique Receipt #, Tax ID, and digital verification seal.
 
-7. **Contact Us Page (`/contact`)**:
-   - Department-specific inquiry form (*General, Donations, Volunteers, Corporate CSR, Emergency Relief*).
-   - 24/7 Helpline `+92 (42) 3588-4422`, WhatsApp Hotline, and regional hubs directory.
-   - Interactive FAQ accordion for Zakat eligibility, tax rebates, and corporate partnerships.
+5. **Campaigns Catalog & Details (`/campaigns`, `/campaigns/:id`)**:
+   - Category and status filters, goal progress trackers, transparent fund breakdown, and direct checkout.
 
 ---
 
-### 🔐 Authentication & Access Control
+### 👥 4 User Roles & Conditional Navigation
 
-- **Firebase Authentication**:
-  - **Google Sign-In** via popup (`signInWithPopup` with `GoogleAuthProvider`) for seamless 1-click access.
-  - **Email & Password Authentication** with full validation, password strength requirements, and friendly error message translations.
-- **Admin Access**:
-  - **Admin Email**: `admin@gmail.com` (or `admin@ngo.org`)
-  - **Admin Password**: `admin123`
-  - 1-click **Autofill** button on the login screen for instant demo testing.
-  - Full route protection via [`ProtectedRoute.jsx`](file:///d:/Full%20stack/Projects/NGO%20Donation%20&%20Volunteer%20Management/src/components/common/ProtectedRoute.jsx).
+The system cleanly bifurcates functionality for four distinct user personas:
+- **Donor**: Direct access to donate funds, explore campaigns, and generate tax receipts.
+- **Volunteer**: Navbar switches to "Volunteer Drives", application form intelligently switches to active Field Hub with service hours.
+- **Beneficiary (Needy / Help-Seeker)**: Dedicated "Request Aid" and "My Aid Status" links, direct case tracker.
+- **Admin**: Full administrative console with real-time Firestore synchronization.
 
 ---
 
 ### 🛡️ Admin Management Console (`/admin`)
 
 - **Dashboard Home (`/admin`)**:
-  - **7 Real-Time KPI Stat Cards** (Total Raised PKR with live monthly target delta, Verified Donations Count, Registered Active Volunteers, Pending Applications Queue, Active Relief Missions, Unique Donors, and Average Donation size).
-  - **Live Activity Stream Ticker**: Automatic audit logging of new donations, volunteer applications, and approvals.
+  - **7 Real-Time KPI Stat Cards** + **Secondary Operational Metrics Bar** with live pending Aid Requests and Volunteer counters.
+  - Live activity audit feed.
+- **Beneficiary Aid Requests Desk (`/admin/aid-requests`)**:
+  - Real-time Cloud Firestore ledger (`subscribeAidRequests`).
+  - Search by Name, CNIC, Phone, City, or category.
+  - Review Modal: Inspect verified documents, update case status (`Pending`, `Under Review`, `Approved`, `Disbursed`, `Rejected`), and append administrator notes.
+  - 1-click CSV Export.
+- **Donation Ledger (`/admin/donations`)**:
+  - Real-time donation tracking with receipt modals, filters, and offline donation logging.
+- **Volunteer Management (`/admin/volunteers`)**:
+  - Review pending applications, approve/reject volunteers, and assign to specific relief campaigns.
+- **Campaigns & Projects (`/admin/campaigns`)**:
+  - Create and edit relief campaigns with goals, deadlines, and featured status toggles.
+- **Donor Directory (`/admin/donors`) & Reports (`/admin/reports`)**:
+  - Donor lifetime giving metrics and statistical analytics charts.
+
+---
+
+### 🔒 Firebase Security Rules (`firestore.rules`)
+
+Production-ready Cloud Firestore security rules guaranteeing data isolation:
+- `users`: Authenticated owner read/update; Admin full control.
+- `aid_requests`: Applicants read their own cases; public create; Admin full update/delete/disbursal.
+- `donations`: Donors read their contributions; public create; Admin manage.
+- `volunteers`: Volunteers read their own profiles; Admin approve/assign.
+- `campaigns`, `activities`, `settings`: Public read; Admin write.
   - **Real-Time Visualizations**: Recharts Area Chart for monthly inflow trends vs target, and Donut Chart for cause allocation.
   - **Live Ledger Entries Table**: Real-time entries with instant receipt viewer.
   - **Pending Volunteer Review Desk**: Quick review with 1-click Approve / Reject actions that immediately update the database without page reload.

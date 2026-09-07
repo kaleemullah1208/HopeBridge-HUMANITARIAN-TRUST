@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { volunteerService } from '../../services/volunteerService';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { ButtonLoader } from '../../components/common/ButtonLoader';
+import { Badge } from '../../components/common/Badge';
 import confetti from 'canvas-confetti';
 import { 
   HandHeart, 
@@ -17,21 +19,33 @@ import {
   Stethoscope,
   BookOpen,
   Truck,
-  Camera
+  Camera,
+  Calendar,
+  MapPin,
+  Flame,
+  CheckCircle,
+  FileText
 } from 'lucide-react';
 
 export const Volunteer = () => {
   const [searchParams] = useSearchParams();
   const preselectedCampaign = searchParams.get('campaign') || '';
 
+  const { currentUser, isVolunteer } = useAuth();
   const { showToast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [submittedApplication, setSubmittedApplication] = useState(null);
+  const [existingVolunteer, setExistingVolunteer] = useState(null);
+  const [activeDrives, setActiveDrives] = useState([
+    { id: 'DRIVE-101', title: 'Tharparkar Solar Water Well Installation Drive', date: 'Upcoming Weekend', location: 'Mithi, Tharparkar', role: 'Logistics & Tech' },
+    { id: 'DRIVE-102', title: 'Ramadan Ration Bagging & Sorting Operation', date: 'Daily 4:00 PM', location: 'Lahore Central Warehouse', role: 'Packaging & Dispatch' },
+    { id: 'DRIVE-103', title: 'Balochistan Mobile Free Health Camp', date: 'Next Month 12-15th', location: 'Khuzdar, Balochistan', role: 'Medical & Crowd Support' }
+  ]);
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
+    name: currentUser?.name || '',
+    email: currentUser?.email || '',
+    phone: currentUser?.phone || '',
     city: 'Lahore',
     address: '',
     areaOfInterest: 'Disaster Relief Operations',
@@ -41,6 +55,35 @@ export const Volunteer = () => {
     message: '',
     campaignId: preselectedCampaign
   });
+
+  useEffect(() => {
+    if (currentUser) {
+      const unsub = volunteerService.subscribeVolunteers((list) => {
+        const found = list.find((v) => 
+          (v.email && currentUser.email && v.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+          (v.id && (v.id === currentUser.id || v.id === currentUser.uid))
+        );
+        if (found) {
+          setExistingVolunteer(found);
+        } else if (isVolunteer) {
+          // If registered as volunteer but no separate record, create a mock profile view
+          setExistingVolunteer({
+            id: `VOL-${currentUser.uid ? currentUser.uid.slice(0, 5) : '7721'}`,
+            name: currentUser.name,
+            email: currentUser.email,
+            phone: currentUser.phone || '+92 300 1234567',
+            city: currentUser.city || 'Lahore',
+            areaOfInterest: 'Field Operations & Humanitarian Aid',
+            availability: 'Weekends & On-Call',
+            status: 'Active',
+            skills: ['General Support', 'Field Operations'],
+            hoursContributed: 28
+          });
+        }
+      });
+      return () => unsub();
+    }
+  }, [currentUser, isVolunteer]);
 
   const availableSkills = [
     'Medical & First Aid',
@@ -200,9 +243,9 @@ export const Volunteer = () => {
         </div>
       </section>
 
-      {/* Interactive Application Form Section */}
+      {/* Interactive Application Form / Volunteer Dashboard Section */}
       <section className="section" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="container" style={{ maxWidth: '820px' }}>
+        <div className="container" style={{ maxWidth: '840px' }}>
           {submittedApplication ? (
             <div className="card" style={{ padding: '3.5rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
               <div style={{
@@ -249,11 +292,100 @@ export const Volunteer = () => {
                   onClick={() => setSubmittedApplication(null)}
                   className="btn btn-outline"
                 >
-                  Submit Another Application
+                  Back to Hub
                 </button>
                 <Link to="/campaigns" className="btn btn-primary">
                   Explore Active Campaigns
                 </Link>
+              </div>
+            </div>
+          ) : existingVolunteer ? (
+            /* Logged-In Volunteer Member Hub */
+            <div className="space-y-6">
+              <div className="card" style={{ padding: '2.5rem', boxShadow: 'var(--shadow-xl)', border: '1px solid var(--border-medium)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1.25rem' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                      <h2 style={{ fontSize: '1.6rem', color: 'var(--navy)', margin: 0 }}>
+                        Volunteer Portal: {existingVolunteer.name}
+                      </h2>
+                      <Badge variant={existingVolunteer.status || 'Active'}>{existingVolunteer.status || 'Active'}</Badge>
+                    </div>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      Member ID: <strong className="font-mono">{existingVolunteer.id}</strong> • City: {existingVolunteer.city || 'Lahore'}
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ textAlign: 'center', background: 'var(--primary-light)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)' }}>
+                      <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary-dark)' }}>
+                        {existingVolunteer.hoursContributed || 24} hrs
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--primary-dark)', fontWeight: '600' }}>Impact Logged</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+                  <div style={{ background: 'var(--bg-subtle)', padding: '1rem', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
+                    <strong style={{ color: 'var(--navy)' }}>Core Expertise:</strong>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+                      {Array.isArray(existingVolunteer.skills) && existingVolunteer.skills.map((s) => (
+                        <span key={s} className="badge badge-info" style={{ fontSize: '0.7rem' }}>{s}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-subtle)', padding: '1rem', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
+                    <strong style={{ color: 'var(--navy)' }}>Assigned Domain:</strong>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>{existingVolunteer.areaOfInterest || 'Field Operations'}</p>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-subtle)', padding: '1rem', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
+                    <strong style={{ color: 'var(--navy)' }}>Availability:</strong>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>{existingVolunteer.availability || 'Weekends & On-Call'}</p>
+                  </div>
+                </div>
+
+                {/* Active Field Drives for Volunteers */}
+                <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-light)', paddingTop: '1.25rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', color: 'var(--navy)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Calendar size={18} color="var(--primary)" /> Upcoming Field Operations & Volunteer Drives
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {activeDrives.map((drive) => (
+                      <div
+                        key={drive.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0.85rem 1.25rem',
+                          borderRadius: 'var(--radius-md)',
+                          border: '1px solid var(--border-light)',
+                          backgroundColor: '#FFFFFF',
+                          flexWrap: 'wrap',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--navy)' }}>{drive.title}</div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', gap: '0.75rem', marginTop: '0.2rem' }}>
+                            <span>📍 {drive.location}</span>
+                            <span>⏰ {drive.date}</span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => showToast('Registered for Drive', `You have been signed up for ${drive.title}. Coordinator will confirm via WhatsApp.`, 'success')}
+                          className="btn btn-sm btn-primary"
+                        >
+                          Join Drive
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ) : (

@@ -398,6 +398,20 @@ export const authService = {
     } catch (error) {
       return { success: false, error: error.message };
     }
+  },
+
+  // Quick switch role (for testing & demo flexibility)
+  quickSwitchRole: (role) => {
+    const currentUser = getFromStorage(KEYS.CURRENT_USER);
+    if (!currentUser) return null;
+    const updated = { ...currentUser, role };
+    saveToStorage(KEYS.CURRENT_USER, updated);
+    if (auth.currentUser) {
+      try {
+        updateDoc(doc(db, 'users', auth.currentUser.uid), { role });
+      } catch (e) {}
+    }
+    return updated;
   }
 };
 

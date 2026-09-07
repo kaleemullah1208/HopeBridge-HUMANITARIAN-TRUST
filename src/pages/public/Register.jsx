@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { ButtonLoader } from '../../components/common/ButtonLoader';
@@ -11,18 +11,22 @@ import {
   Phone, 
   UserPlus, 
   HandHeart,
+  HeartHandshake,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 
 export const Register = () => {
+  const [searchParams] = useSearchParams();
+  const initialRole = searchParams.get('role') || 'Donor';
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'Donor'
+    role: initialRole === 'Beneficiary' ? 'Beneficiary' : (initialRole === 'Volunteer' ? 'Volunteer' : 'Donor')
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -31,6 +35,13 @@ export const Register = () => {
   const { register, loginWithGoogle } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const r = searchParams.get('role');
+    if (r && ['Donor', 'Volunteer', 'Beneficiary'].includes(r)) {
+      setFormData((prev) => ({ ...prev, role: r }));
+    }
+  }, [searchParams]);
 
   const validateForm = () => {
     const errs = {};
@@ -64,7 +75,13 @@ export const Register = () => {
 
     if (res.success) {
       showToast('Account Created!', `Welcome to GiveHope, ${res.user.name}!`, 'success');
-      navigate('/');
+      if (formData.role === 'Beneficiary') {
+        navigate('/my-aid-requests');
+      } else if (formData.role === 'Volunteer') {
+        navigate('/volunteer');
+      } else {
+        navigate('/');
+      }
     } else {
       showToast('Registration Error', res.error || 'Failed to create account.', 'error');
     }
@@ -77,7 +94,13 @@ export const Register = () => {
 
     if (res.success) {
       showToast('Google Account Connected!', `Welcome, ${res.user.name}!`, 'success');
-      navigate('/');
+      if (formData.role === 'Beneficiary') {
+        navigate('/my-aid-requests');
+      } else if (formData.role === 'Volunteer') {
+        navigate('/volunteer');
+      } else {
+        navigate('/');
+      }
     } else {
       showToast('Google Sign-in Failed', res.error || 'Could not register with Google.', 'error');
     }
@@ -168,48 +191,80 @@ export const Register = () => {
             {/* Role Selection */}
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">I want to register as:</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem' }}>
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'Donor' })}
                   style={{
-                    padding: '0.75rem',
+                    padding: '0.65rem 0.5rem',
                     borderRadius: 'var(--radius-md)',
                     border: '2px solid',
                     borderColor: formData.role === 'Donor' ? 'var(--primary)' : 'var(--border-light)',
                     backgroundColor: formData.role === 'Donor' ? 'var(--primary-light)' : '#FFFFFF',
                     color: formData.role === 'Donor' ? 'var(--primary-dark)' : 'var(--text-main)',
                     fontWeight: '700',
-                    fontSize: '0.88rem',
+                    fontSize: '0.82rem',
                     cursor: 'pointer',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.4rem'
+                    gap: '0.25rem',
+                    textAlign: 'center'
                   }}
                 >
-                  <User size={16} /> Regular Donor
+                  <User size={16} />
+                  <span>Donor</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'Volunteer' })}
                   style={{
-                    padding: '0.75rem',
+                    padding: '0.65rem 0.5rem',
                     borderRadius: 'var(--radius-md)',
                     border: '2px solid',
                     borderColor: formData.role === 'Volunteer' ? 'var(--primary)' : 'var(--border-light)',
                     backgroundColor: formData.role === 'Volunteer' ? 'var(--primary-light)' : '#FFFFFF',
                     color: formData.role === 'Volunteer' ? 'var(--primary-dark)' : 'var(--text-main)',
                     fontWeight: '700',
-                    fontSize: '0.88rem',
+                    fontSize: '0.82rem',
                     cursor: 'pointer',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.4rem'
+                    gap: '0.25rem',
+                    textAlign: 'center'
                   }}
                 >
-                  <HandHeart size={16} /> Field Volunteer
+                  <HandHeart size={16} />
+                  <span>Volunteer</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, role: 'Beneficiary' })}
+                  style={{
+                    padding: '0.65rem 0.5rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: '2px solid',
+                    borderColor: formData.role === 'Beneficiary' ? 'var(--primary)' : 'var(--border-light)',
+                    backgroundColor: formData.role === 'Beneficiary' ? 'var(--primary-light)' : '#FFFFFF',
+                    color: formData.role === 'Beneficiary' ? 'var(--primary-dark)' : 'var(--text-main)',
+                    fontWeight: '700',
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.25rem',
+                    textAlign: 'center'
+                  }}
+                >
+                  <HeartHandshake size={16} />
+                  <span>Beneficiary / Aid</span>
                 </button>
               </div>
             </div>
