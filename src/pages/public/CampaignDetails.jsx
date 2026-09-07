@@ -4,6 +4,7 @@ import { campaignService } from '../../services/campaignService';
 import { donationService } from '../../services/donationService';
 import { ProgressBar } from '../../components/common/ProgressBar';
 import { Badge } from '../../components/common/Badge';
+import { PageLoader } from '../../components/common/PageLoader';
 import { useToast } from '../../context/ToastContext';
 import { 
   Heart, 
@@ -23,20 +24,39 @@ import {
 export const CampaignDetails = () => {
   const { id } = useParams();
   const [campaign, setCampaign] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [campaignDonations, setCampaignDonations] = useState([]);
   const [customAmount, setCustomAmount] = useState(2500);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const data = campaignService.getCampaignById(id);
-    if (data) {
-      setCampaign(data);
-      const allDonations = donationService.getDonations();
-      const matched = allDonations.filter((d) => d.campaignId === id || d.campaignTitle === data.title);
+    let currentCamp = null;
+    const unsubCamp = campaignService.subscribeCampaigns((campaignList) => {
+      const found = campaignList.find((c) => c.id === id);
+      if (found) {
+        currentCamp = found;
+        setCampaign(found);
+      }
+      setLoading(false);
+    });
+
+    const unsubDon = donationService.subscribeDonations((allDonations) => {
+      const matched = allDonations.filter(
+        (d) => d.campaignId === id || (currentCamp && d.campaignTitle === currentCamp.title)
+      );
       setCampaignDonations(matched);
-    }
+    });
+
+    return () => {
+      unsubCamp();
+      unsubDon();
+    };
   }, [id]);
+
+  if (loading) {
+    return <PageLoader message="Loading mission details..." />;
+  }
 
   if (!campaign) {
     return (

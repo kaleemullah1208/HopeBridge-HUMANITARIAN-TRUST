@@ -5,10 +5,11 @@ import {
   signOut, 
   updateProfile as updateFirebaseProfile
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, getDocs, collection, onSnapshot } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../firebase/config';
 import { getFromStorage, saveToStorage, KEYS } from './storageService';
 import { INITIAL_USERS, INITIAL_DONORS, INITIAL_VOLUNTEERS } from '../data/mockData';
+import { activityService } from './activityService';
 
 // Friendly error message mapper for Firebase Auth error codes
 export const mapFirebaseError = (error) => {
@@ -36,10 +37,44 @@ export const mapFirebaseError = (error) => {
 };
 
 export const authService = {
-  // Login with Email and Password with strict credential verification
+  // Real-time listener for users
+  subscribeUsers: (callback, onError) => {
+    try {
+      const unsubscribe = onSnapshot(
+        collection(db, 'users'),
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach((docSnap) => {
+              list.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            saveToStorage(KEYS.USERS, list);
+            callback(list);
+          } else {
+            const cached = getFromStorage(KEYS.USERS, INITIAL_USERS);
+            callback(cached);
+          }
+        },
+        (error) => {
+          console.warn('Firestore subscribeUsers error:', error);
+          if (onError) onError(error);
+          const cached = getFromStorage(KEYS.USERS, INITIAL_USERS);
+          callback(cached);
+        }
+      );
+      return unsubscribe;
+    } catch (err) {
+      console.warn('subscribeUsers setup error:', err);
+      const cached = getFromStorage(KEYS.USERS, INITIAL_USERS);
+      callback(cached);
+      return () => {};
+    }
+  },
+
+  // Login with Email and Password
   login: async (email, password) => {
     const trimmedEmail = email.trim().toLowerCase();
-    const isAdminEmail = trimmedEmail === 'admin@gmail.com' || trimmedEmail === 'admin@ngo.org';
+    const isAdminEmail = trimmedEmail === 'admin@gmail.com' || trimmedEmail === 'admin@ngo.org' || trimmedEmail === 'admin@givehope.ngo';
 
     // Strict validation for admin credentials
     if (isAdminEmail && password !== 'admin123') {
@@ -51,7 +86,7 @@ export const authService = {
       try {
         userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
       } catch (signInErr) {
-        // If it's the verified admin credentials and account hasn't been registered in Firebase Auth yet, auto-register it
+        // Auto-register admin account if credentials match
         if (isAdminEmail && password === 'admin123' && (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential')) {
           try {
             userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
@@ -104,7 +139,7 @@ export const authService = {
         userData = {
           id: 'admin-verified-01',
           name: 'System Administrator',
-          email: 'admin@gmail.com',
+          email: trimmedEmail,
           role: 'Admin',
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
           joinedDate: '2026-01-01',
@@ -132,7 +167,7 @@ export const authService = {
         const adminUser = {
           id: 'admin-verified-01',
           name: 'System Administrator',
-          email: 'admin@gmail.com',
+          email: trimmedEmail,
           role: 'Admin',
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
           joinedDate: '2026-01-01',
@@ -152,7 +187,7 @@ export const authService = {
       const user = result.user;
       const uid = user.uid;
       const email = user.email ? user.email.toLowerCase() : '';
-      const isAdminEmail = email === 'admin@gmail.com' || email === 'admin@ngo.org';
+      const isAdminEmail = email === 'admin@gmail.com' || email === 'admin@ngo.org' || email === 'admin@givehope.ngo';
 
       let userData;
       try {
@@ -239,7 +274,7 @@ export const authService = {
   // Register with Email and Password
   register: async (userData) => {
     const trimmedEmail = userData.email.trim().toLowerCase();
-    const isAdminEmail = trimmedEmail === 'admin@gmail.com' || trimmedEmail === 'admin@ngo.org';
+    const isAdminEmail = trimmedEmail === 'admin@gmail.com' || trimmedEmail === 'admin@ngo.org' || trimmedEmail === 'admin@givehope.ngo';
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, userData.password);
@@ -365,3 +400,5 @@ export const authService = {
     }
   }
 };
+
+export default authService;

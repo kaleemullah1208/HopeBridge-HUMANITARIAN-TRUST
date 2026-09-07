@@ -1,21 +1,73 @@
-import { collection, doc, getDocs, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { getFromStorage, saveToStorage, KEYS } from './storageService';
 import { INITIAL_CAMPAIGNS } from '../data/mockData';
+import { activityService } from './activityService';
 
 export const campaignService = {
-  // Get all campaigns (from Firestore or local cache)
+  // Real-time Firestore listener for all campaigns
+  subscribeCampaigns: (callback, onError) => {
+    try {
+      const colRef = collection(db, 'campaigns');
+      const unsubscribe = onSnapshot(
+        colRef,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach((docSnap) => {
+              list.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            saveToStorage(KEYS.CAMPAIGNS, list);
+            callback(list);
+          } else {
+            // Seed initial mock campaigns to Firestore if empty
+            campaignService.seedInitialCampaigns();
+            const cached = getFromStorage(KEYS.CAMPAIGNS, INITIAL_CAMPAIGNS);
+            callback(cached);
+          }
+        },
+        (error) => {
+          console.warn('Firestore subscribeCampaigns error:', error);
+          if (onError) onError(error);
+          const cached = getFromStorage(KEYS.CAMPAIGNS, INITIAL_CAMPAIGNS);
+          callback(cached);
+        }
+      );
+      return unsubscribe;
+    } catch (err) {
+      console.warn('subscribeCampaigns setup error:', err);
+      const cached = getFromStorage(KEYS.CAMPAIGNS, INITIAL_CAMPAIGNS);
+      callback(cached);
+      return () => {};
+    }
+  },
+
+  // Seed default campaigns to Firestore if empty
+  seedInitialCampaigns: async () => {
+    try {
+      const snap = await getDocs(collection(db, 'campaigns'));
+      if (snap.empty) {
+        for (const item of INITIAL_CAMPAIGNS) {
+          await setDoc(doc(db, 'campaigns', item.id), item);
+        }
+      }
+    } catch (e) {
+      console.warn('Seeding initial campaigns note:', e);
+    }
+  },
+
+  // Get all campaigns from local cache
   getCampaigns: () => {
     return getFromStorage(KEYS.CAMPAIGNS, INITIAL_CAMPAIGNS);
   },
 
-  // Async fetch from Firestore and sync
+  // Fetch from Firestore once (fallback)
   fetchCampaignsFromFirestore: async () => {
     try {
       const snap = await getDocs(collection(db, 'campaigns'));
       if (!snap.empty) {
         const list = [];
-        snap.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+        snap.forEach((docSnap) => list.push({ id: docSnap.id, ...docSnap.data() }));
         saveToStorage(KEYS.CAMPAIGNS, list);
         return list;
       }
@@ -31,7 +83,7 @@ export const campaignService = {
     return campaigns.find((c) => c.id === id) || null;
   },
 
-  // Create a new campaign
+  // Create a new campaign in Firestore
   createCampaign: async (campaignData) => {
     const campaigns = getFromStorage(KEYS.CAMPAIGNS, INITIAL_CAMPAIGNS);
     const newId = `camp-${Date.now().toString().slice(-4)}`;
@@ -69,10 +121,19 @@ export const campaignService = {
       console.warn('Firestore setDoc campaign note:', err);
     }
 
+    activityService.logActivity({
+      type: 'campaign_created',
+      title: 'New Campaign Created',
+      description: `${newCampaign.title} created with goal Rs. ${newCampaign.goalAmount.toLocaleString()}`,
+      actor: 'Admin',
+      icon: 'Megaphone',
+      meta: { campaignId: newId }
+    });
+
     return { success: true, campaign: newCampaign };
   },
 
-  // Update an existing campaign
+  // Update an existing campaign in Firestore
   updateCampaign: async (id, updatedFields) => {
     const campaigns = getFromStorage(KEYS.CAMPAIGNS, INITIAL_CAMPAIGNS);
     const index = campaigns.findIndex((c) => c.id === id);
@@ -96,6 +157,15 @@ export const campaignService = {
       console.warn('Firestore updateDoc campaign note:', err);
     }
 
+    activityService.logActivity({
+      type: 'campaign_updated',
+      title: 'Campaign Updated',
+      description: `Updated details for campaign "${campaigns[index].title}"`,
+      actor: 'Admin',
+      icon: 'Edit',
+      meta: { campaignId: id }
+    });
+
     return { success: true, campaign: campaigns[index] };
   },
 
@@ -114,17 +184,17 @@ export const campaignService = {
     return { success: true };
   },
 
-  // Record a donation to a campaign
-  recordDonationToCampaign: (campaignId, amount) => {
+  // Record a donation to a campaign (increment raisedAmount and donorsCount)
+  recordDonationToCampaign: async (campaignId, amount) => {
     const campaigns = getFromStorage(KEYS.CAMPAIGNS, INITIAL_CAMPAIGNS);
     const index = campaigns.findIndex((c) => c.id === campaignId);
     if (index !== -1) {
-      campaigns[index].raisedAmount += Number(amount);
-      campaigns[index].donorsCount += 1;
+      campaigns[index].raisedAmount = Number(campaigns[index].raisedAmount || 0) + Number(amount);
+      campaigns[index].donorsCount = Number(campaigns[index].donorsCount || 0) + 1;
       saveToStorage(KEYS.CAMPAIGNS, campaigns);
 
       try {
-        updateDoc(doc(db, 'campaigns', campaignId), {
+        await updateDoc(doc(db, 'campaigns', campaignId), {
           raisedAmount: campaigns[index].raisedAmount,
           donorsCount: campaigns[index].donorsCount
         });
@@ -137,3 +207,5 @@ export const campaignService = {
     return null;
   }
 };
+
+export default campaignService;

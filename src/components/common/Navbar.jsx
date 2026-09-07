@@ -66,7 +66,7 @@ export const Navbar = () => {
         <span>•</span>
         <span>Emergency Relief Helpline: <strong>+92 (42) 3588-4422</strong></span>
         <span>•</span>
-        <span>Official Portal: <strong>HopeBridge Humanitarian Trust</strong></span>
+        <span>Official Portal: <strong>GiveHope Humanitarian Trust</strong></span>
       </div>
 
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
@@ -87,7 +87,7 @@ export const Navbar = () => {
           </div>
           <div>
             <div style={{ fontFamily: 'var(--font-heading)', fontWeight: '800', fontSize: '1.25rem', color: 'var(--navy)', lineHeight: 1.1 }}>
-              Hope<span style={{ color: 'var(--primary)' }}>Bridge</span>
+              Give<span style={{ color: 'var(--primary)' }}>Hope</span>
             </div>
             <div style={{ fontSize: '0.7rem', fontWeight: '600', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
               HUMANITARIAN TRUST

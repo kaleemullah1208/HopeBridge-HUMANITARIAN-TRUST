@@ -8,6 +8,17 @@ import {
 } from '../data/mockData';
 
 const KEYS = {
+  CAMPAIGNS: 'givehope_campaigns',
+  DONATIONS: 'givehope_donations',
+  VOLUNTEERS: 'givehope_volunteers',
+  DONORS: 'givehope_donors',
+  USERS: 'givehope_users',
+  CURRENT_USER: 'givehope_current_user',
+  SETTINGS: 'givehope_settings',
+  ACTIVITIES: 'givehope_activities'
+};
+
+const LEGACY_KEYS = {
   CAMPAIGNS: 'hopebridge_campaigns',
   DONATIONS: 'hopebridge_donations',
   VOLUNTEERS: 'hopebridge_volunteers',
@@ -19,6 +30,17 @@ const KEYS = {
 
 // Initialize default storage data
 export const initializeStorage = () => {
+  // Migrate legacy data if exists
+  Object.keys(LEGACY_KEYS).forEach((k) => {
+    const oldKey = LEGACY_KEYS[k];
+    const newKey = KEYS[k];
+    if (localStorage.getItem(oldKey) && !localStorage.getItem(newKey)) {
+      try {
+        localStorage.setItem(newKey, localStorage.getItem(oldKey));
+      } catch (e) {}
+    }
+  });
+
   if (!localStorage.getItem(KEYS.CAMPAIGNS)) {
     localStorage.setItem(KEYS.CAMPAIGNS, JSON.stringify(INITIAL_CAMPAIGNS));
   }
@@ -37,13 +59,18 @@ export const initializeStorage = () => {
   if (!localStorage.getItem(KEYS.SETTINGS)) {
     localStorage.setItem(KEYS.SETTINGS, JSON.stringify(INITIAL_NGO_SETTINGS));
   }
-  // User is not logged in by default; must explicitly authenticate
-
 };
 
 export const getFromStorage = (key, defaultValue = null) => {
   try {
-    const item = localStorage.getItem(key);
+    let item = localStorage.getItem(key);
+    if (!item) {
+      // Check legacy key
+      const matchKey = Object.keys(KEYS).find((k) => KEYS[k] === key);
+      if (matchKey && LEGACY_KEYS[matchKey]) {
+        item = localStorage.getItem(LEGACY_KEYS[matchKey]);
+      }
+    }
     return item ? JSON.parse(item) : defaultValue;
   } catch (error) {
     console.error(`Error reading ${key} from storage:`, error);

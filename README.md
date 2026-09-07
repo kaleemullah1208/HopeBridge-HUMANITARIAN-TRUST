@@ -1,14 +1,14 @@
-# HopeBridge - NGO Donation & Volunteer Management System
+# GiveHope - NGO Donation & Volunteer Management System
 
 <div align="center">
 
-![HopeBridge Logo](https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&h=400&q=80)
+![GiveHope Banner](https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&h=400&q=80)
 
-**A Modern, Professional & Comprehensive Web Application for Non-Profit & Humanitarian Organizations**
+**A Modern, Real-Time & Comprehensive Web Application for Non-Profit & Humanitarian Organizations**
 
 [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.0.7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Realtime%20Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![React Router](https://img.shields.io/badge/React_Router-6.28.0-CA4245?style=for-the-badge&logo=react-router&logoColor=white)](https://reactrouter.com/)
 [![Recharts](https://img.shields.io/badge/Recharts-Analytics-22C55E?style=for-the-badge)](https://recharts.org/)
 [![Lucide Icons](https://img.shields.io/badge/Lucide-Icons-F59E0B?style=for-the-badge)](https://lucide.dev/)
@@ -21,9 +21,9 @@
 
 ## 📖 Project Overview
 
-**HopeBridge Humanitarian Welfare Trust** is a full-featured, responsive non-profit web platform engineered to bridge the gap between compassionate donors, active volunteers, and vulnerable communities. 
+**GiveHope Humanitarian Trust** is a full-featured, responsive, real-time non-profit web platform engineered to bridge the gap between compassionate donors, active volunteers, and vulnerable communities. 
 
-The application is built using **React.js**, **Vite**, **Firebase Authentication**, **Cloud Firestore**, and **Recharts**, designed with a modern humanitarian visual language that communicates **Trust, Hope, Compassion, and Professionalism**.
+The application is built using **React.js**, **Vite**, **Firebase Authentication**, **Cloud Firestore (with real-time `onSnapshot` listeners)**, and **Recharts**, designed with a modern humanitarian visual language that communicates **Trust, Hope, Compassion, and Professionalism**.
 
 ---
 
@@ -35,7 +35,7 @@ The application is built using **React.js**, **Vite**, **Firebase Authentication
    - Hero section with humanitarian messaging: *"Together We Can Make a Difference"*.
    - Live impact statistics counters (`18,500+` Lives Impacted, `1,200+` Volunteers, `Rs. 2.8M+` Funds Raised, `50+` Relief Campaigns).
    - Urgent & Featured Campaigns cards with live progress bars and quick donation triggers.
-   - **4 Pillars of HopeBridge**: Emergency Disaster Relief, Mobile Medical Camps, Child Education & Meals, Solar Water Wells.
+   - **4 Pillars of GiveHope**: Emergency Disaster Relief, Mobile Medical Camps, Child Education & Meals, Solar Water Wells.
    - **Live Supporter Wall**: Real-time ticker of recent contributions.
    - Interactive Volunteer callout banner.
 
@@ -96,28 +96,31 @@ The application is built using **React.js**, **Vite**, **Firebase Authentication
 ### 🛡️ Admin Management Console (`/admin`)
 
 - **Dashboard Home (`/admin`)**:
-  - 4 Key Metric Stat Cards (Total Raised, Completed Donations, Registered Volunteers, Active Campaigns).
-  - Recharts Visualizations (Area Chart for monthly inflow trends vs target, Donut Chart for cause allocation).
-  - Recent Ledger Entries table with instant receipt viewer.
-  - Pending Volunteer Applications quick-review widget with 1-click Approve / Reject actions.
+  - **7 Real-Time KPI Stat Cards** (Total Raised PKR with live monthly target delta, Verified Donations Count, Registered Active Volunteers, Pending Applications Queue, Active Relief Missions, Unique Donors, and Average Donation size).
+  - **Live Activity Stream Ticker**: Automatic audit logging of new donations, volunteer applications, and approvals.
+  - **Real-Time Visualizations**: Recharts Area Chart for monthly inflow trends vs target, and Donut Chart for cause allocation.
+  - **Live Ledger Entries Table**: Real-time entries with instant receipt viewer.
+  - **Pending Volunteer Review Desk**: Quick review with 1-click Approve / Reject actions that immediately update the database without page reload.
 - **Donation Ledger (`/admin/donations`)**:
+  - Live Firestore stream of all donor contributions.
   - Search by Donor, Email, Transaction ID, or Campaign.
   - Multi-filtering by Status (*Completed, Pending, Failed*), Campaign, and Payment Method.
   - **"Record Offline Donation"** modal for logging cash/cheque contributions.
   - **"Export CSV"** button for generating spreadsheet ledger reports.
   - Instant Official Receipt modal with Print & Download support.
 - **Volunteer Management (`/admin/volunteers`)**:
-  - Status tabs: *All Applications, Pending Review, Approved & Active, Rejected*.
+  - Real-time application updates and status tabs: *All Applications, Pending Review, Approved & Active, Rejected*.
   - Search and filter by interest area.
   - Detailed Volunteer Profile Modal showing full application, skills, motivation, and assigned campaign dropdown.
-  - Instant Approve/Reject actions and CSV directory export.
+  - Instant Approve/Reject actions with live count updates and CSV directory export.
 - **Campaign Management (`/admin/campaigns`)**:
+  - Live target progress tracking and donor count synchronization.
   - Grid View & Table View toggles.
   - **"Create New Campaign"** modal with category, target goal, dates, location, beneficiaries count, and description.
   - **"Edit Campaign"** modal for live updates.
   - **"Delete Campaign"** with confirmation dialog.
 - **Donor Directory & CRM (`/admin/donors`)**:
-  - Donor table with Lifetime Total Donated, donation count, last gift date, and **Donor Tier Badges** (*Platinum Champion, Gold Benefactor, Silver Supporter, Bronze Friend*).
+  - Real-time aggregated Donor table with Lifetime Total Donated, donation count, last gift date, and **Donor Tier Badges** (*Platinum Champion, Gold Benefactor, Silver Supporter, Bronze Friend*).
   - **Donor Profile Modal** displaying all historical contributions made by that specific donor.
   - CSV export.
 - **Audit Reports & Analytics (`/admin/reports`)**:
@@ -141,11 +144,11 @@ The application is built using **React.js**, **Vite**, **Firebase Authentication
 | **Build Tool** | [Vite 6](https://vitejs.dev/) |
 | **Routing** | [React Router DOM v6](https://reactrouter.com/) |
 | **Authentication** | [Firebase Authentication](https://firebase.google.com/docs/auth) (Google & Email/Password) |
-| **Database** | [Cloud Firestore](https://firebase.google.com/docs/firestore) |
+| **Real-Time Database** | [Cloud Firestore `onSnapshot` Streams](https://firebase.google.com/docs/firestore) |
 | **Charts & Data Viz** | [Recharts 2](https://recharts.org/) |
 | **Icons** | [Lucide React](https://lucide.dev/) |
-| **Styling** | Custom Responsive CSS Design System (CSS Tokens, Glassmorphism, Micro-animations) |
-| **Micro-Interactions** | [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti) |
+| **Styling** | Custom Responsive CSS Design System (CSS Tokens, Shimmer Animations, Micro-interactions) |
+| **Feedback & UX** | Custom Skeletons, Button Loaders, Pulse Emblem & Canvas Confetti |
 
 ---
 
@@ -157,12 +160,18 @@ src/
 │   └── common/
 │       ├── Badge.jsx                 # Status & tier badges
 │       ├── Button.jsx                # Reusable button styles
+│       ├── ButtonLoader.jsx          # Button spinner for pending async actions
 │       ├── DonationReceiptModal.jsx  # Printable official tax receipt modal
+│       ├── ErrorState.jsx            # Error state card with retry action
 │       ├── Footer.jsx                # Humanitarian footer with trust badges
+│       ├── Loader.jsx                # GiveHope branded pulsing emblem loader
 │       ├── Modal.jsx                 # Accessible dialog overlay
 │       ├── Navbar.jsx                # Sticky glassmorphic navbar & drawer
+│       ├── PageLoader.jsx            # Page/section level loader
 │       ├── ProgressBar.jsx           # Calculated progress tracker
 │       ├── ProtectedRoute.jsx        # Admin route guard
+│       ├── SkeletonCard.jsx          # Shimmer card placeholder
+│       ├── SkeletonTable.jsx         # Shimmer table rows placeholder
 │       ├── StatCard.jsx              # Executive KPI cards
 │       └── ToastContainer.jsx        # Global notifications UI
 ├── context/
@@ -177,16 +186,16 @@ src/
 ├── pages/
 │   ├── admin/
 │   │   ├── CampaignManagement.jsx    # Campaign CRUD & status toggles
-│   │   ├── DashboardHome.jsx         # Executive overview & Recharts
-│   │   ├── DonationsManagement.jsx   # Ledger, offline entries & CSV export
-│   │   ├── DonorManagement.jsx       # Donor CRM & giving history
+│   │   ├── DashboardHome.jsx         # 7 KPI stat cards, live activity & Recharts
+│   │   ├── DonationsManagement.jsx   # Real-time ledger, offline entries & CSV export
+│   │   ├── DonorManagement.jsx       # Real-time donor CRM & giving history
 │   │   ├── ReportsAnalytics.jsx      # Audit reports & analytics
 │   │   ├── Settings.jsx              # Org config & demo reset
-│   │   └── VolunteerManagement.jsx   # Volunteer review & approval workflow
+│   │   └── VolunteerManagement.jsx   # Real-time volunteer review & approval workflow
 │   └── public/
 │       ├── About.jsx                 # Mission, values, team & milestones
-│       ├── CampaignDetails.jsx       # Mission story & quick donate widget
-│       ├── Campaigns.jsx             # Searchable campaigns catalog
+│       ├── CampaignDetails.jsx       # Real-time mission story & quick donate widget
+│       ├── Campaigns.jsx             # Real-time searchable campaigns catalog
 │       ├── Contact.jsx               # Inquiries form, helpline & FAQ
 │       ├── Donate.jsx                # Multi-step checkout & receipt generator
 │       ├── Home.jsx                  # Landing page with hero & 4 pillars
@@ -195,16 +204,17 @@ src/
 │       ├── Register.jsx              # Account creation with role selection
 │       └── Volunteer.jsx             # Volunteer portal & application form
 ├── services/
+│   ├── activityService.js            # Real-time activity feed & event logger
 │   ├── authService.js                # Firebase Auth & Google login methods
-│   ├── campaignService.js            # Campaign operations & Firestore sync
-│   ├── donationService.js            # Donations recording & stats
-│   ├── donorService.js               # Donor CRM methods
+│   ├── campaignService.js            # Real-time campaign sync & Firestore updates
+│   ├── donationService.js            # Real-time donations stream & dynamic KPI calculations
+│   ├── donorService.js               # Real-time donor CRM & tier metrics
 │   ├── reportService.js              # Aggregations & CSV export utilities
 │   ├── settingsService.js            # System settings & reset methods
-│   ├── storageService.js             # Local cache & persistence layer
-│   └── volunteerService.js           # Volunteer application workflow
+│   ├── storageService.js             # Local cache & fallback persistence layer
+│   └── volunteerService.js           # Real-time volunteer applications workflow
 ├── App.jsx                           # Route declarations
-├── index.css                         # Design system & print stylesheets
+├── index.css                         # Design system, shimmer & print stylesheets
 └── main.jsx                          # Root DOM mount
 ```
 
@@ -258,4 +268,4 @@ src/
 
 ## 📄 License & Humanitarian Disclaimer
 
-This project is created for non-profit and humanitarian management purposes. All rights reserved by **HopeBridge Humanitarian Welfare Trust**.
+This project is created for non-profit and humanitarian management purposes. All rights reserved by **GiveHope Humanitarian Trust**.

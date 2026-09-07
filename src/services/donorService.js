@@ -1,10 +1,69 @@
-import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { getFromStorage, saveToStorage, KEYS } from './storageService';
 import { INITIAL_DONORS } from '../data/mockData';
 import { donationService } from './donationService';
 
 export const donorService = {
+  // Real-time Firestore listener for donors
+  subscribeDonors: (callback, onError) => {
+    try {
+      const colRef = collection(db, 'donors');
+      const unsubscribe = onSnapshot(
+        colRef,
+        (snapshot) => {
+          let list = [];
+          if (!snapshot.empty) {
+            snapshot.forEach((docSnap) => {
+              list.push({ id: docSnap.id, ...docSnap.data() });
+            });
+          } else {
+            list = getFromStorage(KEYS.DONORS, INITIAL_DONORS);
+          }
+
+          // Calculate with current live donations
+          const allDonations = donationService.getDonations();
+          list = list.map((donor) => {
+            const userDonations = allDonations.filter(
+              (don) => don.email?.toLowerCase() === donor.email?.toLowerCase() && don.status === 'Completed'
+            );
+            const totalDonated = userDonations.reduce((sum, d) => sum + Number(d.amount), 0);
+            const donationsCount = userDonations.length;
+            const lastDonation = userDonations[0]?.transactionDate?.split('T')[0] || donor.lastDonationDate;
+
+            let tier = donor.tier || 'Bronze Friend';
+            if (totalDonated >= 100000) tier = 'Platinum Champion';
+            else if (totalDonated >= 40000) tier = 'Gold Benefactor';
+            else if (totalDonated >= 15000) tier = 'Silver Supporter';
+
+            return {
+              ...donor,
+              totalDonated: totalDonated > 0 ? totalDonated : (donor.totalDonated || 0),
+              donationsCount: donationsCount > 0 ? donationsCount : (donor.donationsCount || 0),
+              lastDonationDate: lastDonation,
+              tier
+            };
+          });
+
+          saveToStorage(KEYS.DONORS, list);
+          callback(list);
+        },
+        (error) => {
+          console.warn('Firestore subscribeDonors note:', error);
+          if (onError) onError(error);
+          const cached = getFromStorage(KEYS.DONORS, INITIAL_DONORS);
+          callback(cached);
+        }
+      );
+      return unsubscribe;
+    } catch (err) {
+      console.warn('subscribeDonors setup error:', err);
+      const cached = getFromStorage(KEYS.DONORS, INITIAL_DONORS);
+      callback(cached);
+      return () => {};
+    }
+  },
+
   // Get all donors (from cache/storage)
   getDonors: () => {
     return getFromStorage(KEYS.DONORS, INITIAL_DONORS);
@@ -39,7 +98,6 @@ export const donorService = {
           const user = { id: docSnap.id, ...docSnap.data() };
           const emailLower = user.email?.toLowerCase();
           if (emailLower && !existingEmails.has(emailLower)) {
-            // New registered user from Firebase not yet in donors list
             const userDonorEntry = {
               id: user.uid || user.id || `USR-${Math.floor(1000 + Math.random() * 9000)}`,
               name: user.name || (emailLower.split('@')[0]),
@@ -120,3 +178,5 @@ export const donorService = {
     return { success: true };
   }
 };
+
+export default donorService;

@@ -7,12 +7,12 @@ import {
   Phone, 
   MapPin, 
   ShieldCheck, 
-  ArrowRight,
-  Globe,
-  Share2,
-  MessageCircle,
-  Clock,
-  Sparkles
+  ArrowRight, 
+  Globe, 
+  Share2, 
+  MessageCircle, 
+  Clock, 
+  Sparkles 
 } from 'lucide-react';
 
 export const Footer = () => {
@@ -56,7 +56,7 @@ export const Footer = () => {
               </div>
               <div>
                 <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '800', fontSize: '1.25rem', color: '#FFFFFF' }}>
-                  Hope<span style={{ color: 'var(--primary)' }}>Bridge</span>
+                  Give<span style={{ color: 'var(--primary)' }}>Hope</span>
                 </span>
                 <span style={{ display: 'block', fontSize: '0.65rem', color: '#94A3B8', letterSpacing: '0.05em' }}>
                   WELFARE & RELIEF TRUST
@@ -64,7 +64,7 @@ export const Footer = () => {
               </div>
             </Link>
             <p style={{ color: '#94A3B8', fontSize: '0.9rem', lineHeight: '1.6' }}>
-              HopeBridge is a registered non-profit humanitarian organization committed to disaster relief, quality education, healthcare equity, and community empowerment.
+              GiveHope is a registered non-profit humanitarian organization committed to disaster relief, quality education, healthcare equity, and community empowerment.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <a href="https://facebook.com" target="_blank" rel="noreferrer" style={{ color: '#94A3B8', padding: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '50%' }} aria-label="Social Link">
@@ -76,7 +76,7 @@ export const Footer = () => {
               <a href="https://instagram.com" target="_blank" rel="noreferrer" style={{ color: '#94A3B8', padding: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '50%' }} aria-label="Share">
                 <Share2 size={18} />
               </a>
-              <a href="mailto:contact@hopebridge.ngo" style={{ color: '#94A3B8', padding: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '50%' }} aria-label="Email">
+              <a href="mailto:contact@givehope.ngo" style={{ color: '#94A3B8', padding: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '50%' }} aria-label="Email">
                 <Mail size={18} />
               </a>
             </div>
@@ -132,7 +132,7 @@ export const Footer = () => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                 <Mail size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
-                <span>support@hopebridge.ngo</span>
+                <span>support@givehope.ngo</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                 <Clock size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
@@ -200,7 +200,7 @@ export const Footer = () => {
           color: '#64748B'
         }}>
           <div>
-            © {new Date().getFullYear()} HopeBridge Humanitarian Welfare Trust. All Rights Reserved.
+            © {new Date().getFullYear()} GiveHope Humanitarian Welfare Trust. All Rights Reserved.
           </div>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <Link to="/about" style={{ color: '#94A3B8' }}>Privacy Policy</Link>
@@ -212,3 +212,5 @@ export const Footer = () => {
     </footer>
   );
 };
+
+export default Footer;

@@ -30,12 +30,12 @@ export const Contact = () => {
 
   const faqs = [
     {
-      q: "How does HopeBridge ensure 100% Zakat compliance?",
-      a: "HopeBridge maintains a strictly segregated, Sharia-certified Zakat bank account. 100% of your Zakat funds are utilized solely for eligible beneficiaries (Mustahiqueen) under Sharia guidelines for emergency food, medicine, and clean water borewells with zero deduction for administrative overheads."
+      q: "How does GiveHope ensure 100% Zakat compliance?",
+      a: "GiveHope maintains a strictly segregated, Sharia-certified Zakat bank account. 100% of your Zakat funds are utilized solely for eligible beneficiaries (Mustahiqueen) under Sharia guidelines for emergency food, medicine, and clean water borewells with zero deduction for administrative overheads."
     },
     {
       q: "Will I receive an official tax deduction certificate for my donation?",
-      a: "Yes! HopeBridge is approved under Section 61 and 2(36) of the Income Tax Ordinance. Every donation immediately generates an official Tax-Exempt Receipt containing our registration numbers and tax ID, valid for claiming tax rebates with the FBR."
+      a: "Yes! GiveHope is approved under Section 61 and 2(36) of the Income Tax Ordinance. Every donation immediately generates an official Tax-Exempt Receipt containing our registration numbers and tax ID, valid for claiming tax rebates with the FBR."
     },
     {
       q: "Can overseas Pakistanis and international donors contribute?",
@@ -117,8 +117,8 @@ export const Contact = () => {
                 </div>
                 <div>
                   <h4 style={{ fontSize: '1rem', color: 'var(--navy)', marginBottom: '0.25rem' }}>Email Inquiries</h4>
-                  <div style={{ fontWeight: '600', color: 'var(--navy)', fontSize: '0.92rem' }}>contact@hopebridge.ngo</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>donations@hopebridge.ngo</div>
+                  <div style={{ fontWeight: '600', color: 'var(--navy)', fontSize: '0.92rem' }}>contact@givehope.ngo</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>donations@givehope.ngo</div>
                 </div>
               </div>
 
@@ -243,7 +243,7 @@ export const Contact = () => {
                     className="btn btn-lg btn-primary"
                     style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                   >
-                    <Send size={18} /> {submitting ? 'Sending Message...' : 'Send Message to HopeBridge'}
+                    <Send size={18} /> {submitting ? 'Sending Message...' : 'Send Message to GiveHope'}
                   </button>
                 </form>
               </div>

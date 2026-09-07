@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { campaignService } from '../../services/campaignService';
 import { ProgressBar } from '../../components/common/ProgressBar';
 import { Badge } from '../../components/common/Badge';
+import { SkeletonCard } from '../../components/common/SkeletonCard';
 import { 
   Search, 
   Filter, 
@@ -18,6 +19,7 @@ import {
 
 export const Campaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
@@ -34,8 +36,11 @@ export const Campaigns = () => {
   ];
 
   useEffect(() => {
-    const data = campaignService.getCampaigns();
-    setCampaigns(data);
+    const unsub = campaignService.subscribeCampaigns((data) => {
+      setCampaigns(data);
+      setLoading(false);
+    });
+    return () => unsub();
   }, []);
 
   const filteredCampaigns = campaigns.filter((c) => {
@@ -153,7 +158,13 @@ export const Campaigns = () => {
       {/* Campaigns Grid */}
       <section className="section" style={{ backgroundColor: 'var(--bg-page)' }}>
         <div className="container">
-          {filteredCampaigns.length === 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((idx) => (
+                <SkeletonCard key={idx} height={340} />
+              ))}
+            </div>
+          ) : filteredCampaigns.length === 0 ? (
             <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
               <Filter size={48} color="var(--text-light)" style={{ margin: '0 auto 1rem auto' }} />
               <h3 style={{ fontSize: '1.3rem', color: 'var(--navy)' }}>No matching campaigns found</h3>

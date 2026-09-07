@@ -36,10 +36,23 @@ export const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const allCampaigns = campaignService.getCampaigns();
-    setCampaigns(allCampaigns.slice(0, 3)); // Featured top 3
-    const allDonations = donationService.getDonations();
-    setRecentDonations(allDonations.slice(0, 5));
+    const unsubCamp = campaignService.subscribeCampaigns((allCampaigns) => {
+      setCampaigns(allCampaigns.slice(0, 3));
+    });
+
+    const unsubDon = donationService.subscribeDonations((allDonations) => {
+      setRecentDonations(allDonations.slice(0, 5));
+      const totalRaised = allDonations.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+      setStats((prev) => ({
+        ...prev,
+        fundsRaised: `Rs. ${(totalRaised / 1000000).toFixed(1)}M+`
+      }));
+    });
+
+    return () => {
+      unsubCamp();
+      unsubDon();
+    };
   }, []);
 
   return (
@@ -114,7 +127,7 @@ export const Home = () => {
               </h1>
 
               <p style={{ fontSize: '1.15rem', color: '#CBD5E1', lineHeight: '1.7', maxWidth: '540px' }}>
-                Join HopeBridge in providing emergency flood relief rations, life-saving medical aid, solar water borewells, and school sponsorships to vulnerable families across Pakistan.
+                Join GiveHope in providing emergency flood relief rations, life-saving medical aid, solar water borewells, and school sponsorships to vulnerable families across Pakistan.
               </p>
 
               {/* Action Buttons */}
@@ -322,13 +335,13 @@ export const Home = () => {
       </section>
 
       {/* ====================================================================
-          HOW WE HELP / 4 PILLARS OF HOPEBRIDGE
+          HOW WE HELP / 4 PILLARS OF GIVEHOPE
           ==================================================================== */}
       <section className="section" style={{ backgroundColor: '#FFFFFF', borderTop: '1px solid var(--border-light)' }}>
         <div className="container">
           <div className="section-title-wrap">
             <span className="section-tag">Humanitarian Pillars</span>
-            <h2 className="section-title">How HopeBridge Transforms Lives</h2>
+            <h2 className="section-title">How GiveHope Transforms Lives</h2>
             <p className="section-subtitle">
               We operate with zero bureaucratic delays to bring sustainable, dignity-affirming solutions directly into the hands of those who need it most.
             </p>
@@ -503,7 +516,7 @@ export const Home = () => {
             }}>
               <img
                 src="https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1000&q=80"
-                alt="HopeBridge Volunteers packing food boxes"
+                alt="GiveHope Volunteers packing food boxes"
                 style={{ width: '100%', height: '360px', objectFit: 'cover' }}
               />
             </div>

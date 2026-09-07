@@ -71,7 +71,7 @@ export const DonationReceiptModal = ({ isOpen, onClose, donation }) => {
             </div>
             <div>
               <div style={{ fontFamily: 'var(--font-heading)', fontWeight: '800', fontSize: '1.3rem', color: 'var(--navy)' }}>
-                HopeBridge Welfare Trust
+                GiveHope Welfare Trust
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 Govt Reg: PB/2021/9842 | NTN: 7492104-9
@@ -98,27 +98,35 @@ export const DonationReceiptModal = ({ isOpen, onClose, donation }) => {
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
           gap: '1rem',
-          fontSize: '0.88rem'
+          fontSize: '0.85rem'
         }}>
           <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Receipt Number</div>
-            <div style={{ fontWeight: '700', color: 'var(--navy)' }}>{donation.id}</div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Donor Full Name</span>
+            <strong style={{ color: 'var(--navy)', fontSize: '0.95rem' }}>{donation.donorName}</strong>
           </div>
           <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Date & Time</div>
-            <div style={{ fontWeight: '700', color: 'var(--navy)' }}>{formattedDate}</div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Allocated Campaign</span>
+            <strong style={{ color: 'var(--navy)', fontSize: '0.95rem' }}>{donation.campaignTitle}</strong>
           </div>
           <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Tax Exemption Cert #</div>
-            <div style={{ fontWeight: '700', color: 'var(--primary)' }}>{donation.taxExemptId || 'TX-HB-98401'}</div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Receipt Voucher #</span>
+            <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary)' }}>{donation.taxExemptId || donation.id}</span>
           </div>
           <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Payment Method</div>
-            <div style={{ fontWeight: '700', color: 'var(--navy)' }}>{donation.paymentMethod || 'Online Gateway'}</div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Transaction Date</span>
+            <span>{formattedDate}</span>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Payment Mode</span>
+            <span>{donation.paymentMethod || 'Online Gateway'}</span>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Status</span>
+            <span style={{ color: 'var(--status-success)', fontWeight: '700' }}>Completed & Dispatched</span>
           </div>
         </div>
 
-        {/* Donor & Campaign Details */}
+        {/* Financial Details Table */}
         <div style={{ marginBottom: '1.5rem', fontSize: '0.9rem' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <tbody>
@@ -192,15 +200,17 @@ export const DonationReceiptModal = ({ isOpen, onClose, donation }) => {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--primary-dark)', fontWeight: '600' }}>
             <ShieldCheck size={18} color="var(--primary)" />
-            <span>Digitally Verified & Certified by HopeBridge Finance Desk</span>
+            <span>Digitally Verified & Certified by GiveHope Finance Desk</span>
           </div>
 
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontWeight: '700', color: 'var(--navy)' }}>Authorized Trustee Signatory</div>
-            <div style={{ color: 'var(--text-muted)' }}>HopeBridge Welfare Trust</div>
+            <div style={{ color: 'var(--text-muted)' }}>GiveHope Welfare Trust</div>
           </div>
         </div>
       </div>
     </Modal>
   );
 };
+
+export default DonationReceiptModal;

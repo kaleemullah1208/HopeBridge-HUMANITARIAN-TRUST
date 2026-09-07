@@ -74,7 +74,7 @@ export const ReportsAnalytics = () => {
 
       {/* Printable Report Header for Official Export */}
       <div style={{ display: 'none' }} className="printable-receipt">
-        <h2>HopeBridge Humanitarian Welfare Trust - Annual Audit Report</h2>
+        <h2>GiveHope Humanitarian Welfare Trust - Annual Audit Report</h2>
         <p>Govt Reg: PB/2021/9842 | Generated Date: {new Date().toLocaleDateString()}</p>
       </div>
 

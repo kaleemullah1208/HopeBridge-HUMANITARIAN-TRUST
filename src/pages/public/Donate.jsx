@@ -5,6 +5,7 @@ import { donationService } from '../../services/donationService';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { DonationReceiptModal } from '../../components/common/DonationReceiptModal';
+import { ButtonLoader } from '../../components/common/ButtonLoader';
 import confetti from 'canvas-confetti';
 import { 
   Heart, 
@@ -48,11 +49,13 @@ export const Donate = () => {
   });
 
   useEffect(() => {
-    const list = campaignService.getCampaigns();
-    setCampaigns(list);
-    if (!selectedCampaignId && list.length > 0) {
-      setSelectedCampaignId(list[0].id);
-    }
+    const unsub = campaignService.subscribeCampaigns((list) => {
+      setCampaigns(list);
+      if (!selectedCampaignId && list.length > 0) {
+        setSelectedCampaignId(list[0].id);
+      }
+    });
+    return () => unsub();
   }, [selectedCampaignId]);
 
   const presetAmounts = [500, 1000, 2500, 5000, 10000, 25000, 50000];
@@ -438,8 +441,12 @@ export const Donate = () => {
                 className="btn btn-lg btn-accent"
                 style={{ fontWeight: '800', padding: '1rem 2.25rem', fontSize: '1.05rem', boxShadow: '0 6px 20px rgba(245, 158, 11, 0.4)' }}
               >
-                <Heart size={20} fill="#FFFFFF" />
-                {submitting ? 'Processing Contribution...' : 'Complete Donation & Get Receipt'}
+                <ButtonLoader loading={submitting} loadingText="Processing Contribution...">
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Heart size={20} fill="#FFFFFF" />
+                    <span>Complete Donation & Get Receipt</span>
+                  </span>
+                </ButtonLoader>
               </button>
             </div>
           </form>

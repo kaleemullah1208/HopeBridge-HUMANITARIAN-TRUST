@@ -1,4 +1,4 @@
-// Initial Mock Data for HopeBridge NGO Management System
+// Initial Mock Data for GiveHope NGO Management System
 
 export const INITIAL_CAMPAIGNS = [
   {
@@ -41,7 +41,7 @@ export const INITIAL_CAMPAIGNS = [
     description: "Sponsoring school fees, uniforms, digital learning tablets, and daily nutritious midday meals for 500 street children and orphan students in slum community schools.",
     longDescription: `Education is the only lasting bridge out of systemic poverty. In underserved suburban settlements, thousands of bright children are forced to drop out due to lack of books, school fees, and basic nutrition.
 
-    Through this flagship initiative, HopeBridge operates 6 community learning centers and sponsors full annual tuition, textbooks, digital learning labs, certified teachers' stipends, and healthy warm lunches for 500 children.
+    Through this flagship initiative, GiveHope operates 6 community learning centers and sponsors full annual tuition, textbooks, digital learning labs, certified teachers' stipends, and healthy warm lunches for 500 children.
     
     Your monthly sponsorship of Rs. 2,500 ensures a child stays in school for a full academic year.`,
     goalAmount: 850000,
@@ -95,7 +95,7 @@ export const INITIAL_CAMPAIGNS = [
     description: "Distributing warm jackets, thermal innerwear, wool blankets, and socks to homeless individuals and mountain village families facing sub-zero temperatures.",
     longDescription: `When winter temperatures plummet below freezing in northern mountain regions, cold waves claim vulnerable elderly lives and infants. 
     
-    HopeBridge's annual Winter Warmth Drive delivers comprehensive warmth packages containing high-density wool blankets, thermal socks, heavy fleece jackets, woolen caps, and insulated footwear directly to mountain villages and urban pavement dwellers.`,
+    GiveHope's annual Winter Warmth Drive delivers comprehensive warmth packages containing high-density wool blankets, thermal socks, heavy fleece jackets, woolen caps, and insulated footwear directly to mountain villages and urban pavement dwellers.`,
     goalAmount: 600000,
     raisedAmount: 580000,
     donorsCount: 142,
@@ -147,7 +147,7 @@ export const INITIAL_CAMPAIGNS = [
     description: "Serving over 800 freshly cooked, hygienic, dignified meals every day to daily wage laborers, hospital attendants, and homeless persons.",
     longDescription: `With rising inflation, daily-wage laborers, rickshaw drivers, and patient attendants outside public hospitals struggle to afford even one square meal a day.
     
-    HopeBridge operates 3 hygienic community kitchens (Dastarkhwans) serving hot, nutritious lunch and dinner meals (chicken biryani, mutton lentils, fresh roti, yogurt, and clean water) with dignity and respect to anyone who walks in.`,
+    GiveHope operates 3 hygienic community kitchens (Dastarkhwans) serving hot, nutritious lunch and dinner meals (chicken biryani, mutton lentils, fresh roti, yogurt, and clean water) with dignity and respect to anyone who walks in.`,
     goalAmount: 900000,
     raisedAmount: 900000,
     donorsCount: 220,
@@ -183,7 +183,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-09-02T10:30:00Z",
     anonymous: false,
     message: "May this help bring relief to those in remote areas. Keep up the noble work!",
-    taxExemptId: "TX-HB-99120"
+    taxExemptId: "TX-GH-99120"
   },
   {
     id: "DON-2026-8802",
@@ -200,7 +200,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-09-01T15:14:00Z",
     anonymous: false,
     message: "Monthly contribution for flood relief emergency food packages.",
-    taxExemptId: "TX-HB-99121"
+    taxExemptId: "TX-GH-99121"
   },
   {
     id: "DON-2026-8803",
@@ -217,7 +217,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-08-30T11:20:00Z",
     anonymous: false,
     message: "In memory of my late parents for continuous charity (Sadaqah Jariyah).",
-    taxExemptId: "TX-HB-99122"
+    taxExemptId: "TX-GH-99122"
   },
   {
     id: "DON-2026-8804",
@@ -234,7 +234,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-08-29T18:45:00Z",
     anonymous: true,
     message: "For books and school bags for the little ones.",
-    taxExemptId: "TX-HB-99123"
+    taxExemptId: "TX-GH-99123"
   },
   {
     id: "DON-2026-8805",
@@ -251,7 +251,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-08-28T09:15:00Z",
     anonymous: false,
     message: "Stay warm this winter!",
-    taxExemptId: "TX-HB-99124"
+    taxExemptId: "TX-GH-99124"
   },
   {
     id: "DON-2026-8806",
@@ -268,7 +268,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-08-27T16:00:00Z",
     anonymous: false,
     message: "Awaiting payment verification on merchant portal.",
-    taxExemptId: "TX-HB-99125"
+    taxExemptId: "TX-GH-99125"
   },
   {
     id: "DON-2026-8807",
@@ -285,7 +285,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-08-25T14:10:00Z",
     anonymous: false,
     message: "Sponsoring 3 kids education.",
-    taxExemptId: "TX-HB-99126"
+    taxExemptId: "TX-GH-99126"
   },
   {
     id: "DON-2026-8808",
@@ -302,7 +302,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-08-24T11:00:00Z",
     anonymous: false,
     message: "For essential medicines and lab tests.",
-    taxExemptId: "TX-HB-99127"
+    taxExemptId: "TX-GH-99127"
   },
   {
     id: "DON-2026-8809",
@@ -319,7 +319,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-08-22T20:30:00Z",
     anonymous: false,
     message: "Transaction declined by issuing bank (insufficient balance).",
-    taxExemptId: "TX-HB-99128"
+    taxExemptId: "TX-GH-99128"
   },
   {
     id: "DON-2026-8810",
@@ -336,7 +336,7 @@ export const INITIAL_DONATIONS = [
     transactionDate: "2026-08-20T12:00:00Z",
     anonymous: false,
     message: "Feeding daily wage workers for 2 weeks.",
-    taxExemptId: "TX-HB-99129"
+    taxExemptId: "TX-GH-99129"
   }
 ];
 
@@ -390,7 +390,7 @@ export const INITIAL_VOLUNTEERS = [
     approvedDate: "2026-08-21",
     assignedCampaign: "camp-002",
     hoursContributed: 36,
-    message: "Excited to teach mathematics, english, and art therapy to underprivileged children at HopeBridge learning centers."
+    message: "Excited to teach mathematics, english, and art therapy to underprivileged children at GiveHope learning centers."
   },
   {
     id: "VOL-104",
@@ -424,7 +424,7 @@ export const INITIAL_VOLUNTEERS = [
     approvedDate: null,
     assignedCampaign: null,
     hoursContributed: 0,
-    message: "I can help connect HopeBridge with corporate CSR sponsorship programs for clean water solar wells."
+    message: "I can help connect GiveHope with corporate CSR sponsorship programs for clean water solar wells."
   },
   {
     id: "VOL-106",
@@ -553,7 +553,7 @@ export const INITIAL_USERS = [
   {
     id: "usr-admin-01",
     name: "Ihsan Ullah (Executive Director)",
-    email: "admin@ngo.org",
+    email: "admin@givehope.ngo",
     role: "Admin",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
     joinedDate: "2024-01-15",
@@ -580,24 +580,24 @@ export const INITIAL_USERS = [
 ];
 
 export const INITIAL_NGO_SETTINGS = {
-  orgName: "HopeBridge Welfare & Humanitarian Trust",
-  shortName: "HopeBridge NGO",
+  orgName: "GiveHope Humanitarian Trust",
+  shortName: "GiveHope NGO",
   tagline: "Together We Can Make a Difference",
   registrationNumber: "NGO/REG-PB/2021/9842",
   ntnNumber: "7492104-9",
   taxExemptionStatus: "Section 61 & 2(36) Approved Non-Profit",
   currency: "PKR",
   currencySymbol: "Rs.",
-  email: "contact@hopebridge.ngo",
+  email: "contact@givehope.ngo",
   helpline: "+92 (42) 3588-4422",
   whatsapp: "+92 300 9988776",
   address: "Plot 42-B, Main Boulevard, Gulberg III, Lahore, Pakistan",
   socialLinks: {
-    facebook: "https://facebook.com/hopebridgengo",
-    twitter: "https://twitter.com/hopebridgengo",
-    instagram: "https://instagram.com/hopebridgengo",
-    linkedin: "https://linkedin.com/company/hopebridgengo",
-    youtube: "https://youtube.com/c/hopebridgengo"
+    facebook: "https://facebook.com/givehopengo",
+    twitter: "https://twitter.com/givehopengo",
+    instagram: "https://instagram.com/givehopengo",
+    linkedin: "https://linkedin.com/company/givehopengo",
+    youtube: "https://youtube.com/c/givehopengo"
   },
   paymentGateways: {
     jazzCashEnabled: true,

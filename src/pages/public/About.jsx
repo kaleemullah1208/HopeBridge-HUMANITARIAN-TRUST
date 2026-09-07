@@ -46,7 +46,7 @@ export const About = () => {
     {
       year: "2021",
       title: "Founding & Registration",
-      desc: "HopeBridge was established as a certified non-profit trust in response to urban poverty and healthcare disparities."
+      desc: "GiveHope was established as a certified non-profit trust in response to urban poverty and healthcare disparities."
     },
     {
       year: "2022",
@@ -76,13 +76,13 @@ export const About = () => {
       }}>
         <div className="container" style={{ maxWidth: '800px' }}>
           <span className="section-tag" style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#A7F3D0', borderColor: 'rgba(255,255,255,0.2)' }}>
-            About HopeBridge Trust
+            About GiveHope Trust
           </span>
           <h1 style={{ fontSize: '2.8rem', color: '#FFFFFF', marginTop: '0.5rem', marginBottom: '1rem' }}>
             Transforming Compassion into Direct Action
           </h1>
           <p style={{ fontSize: '1.1rem', color: '#CBD5E1', lineHeight: '1.7' }}>
-            HopeBridge is dedicated to building a world where every human being has immediate access to food, clean water, healthcare, education, and disaster relief with utmost dignity.
+            GiveHope is dedicated to building a world where every human being has immediate access to food, clean water, healthcare, education, and disaster relief with utmost dignity.
           </p>
         </div>
       </section>
@@ -257,7 +257,7 @@ export const About = () => {
         <div className="container">
           <div className="section-title-wrap">
             <span className="section-tag">Dedicated Leadership</span>
-            <h2 className="section-title">The People Behind HopeBridge</h2>
+            <h2 className="section-title">The People Behind GiveHope</h2>
             <p className="section-subtitle">
               Passionate humanitarian professionals, physicians, educators, and field organizers working day and night.
             </p>

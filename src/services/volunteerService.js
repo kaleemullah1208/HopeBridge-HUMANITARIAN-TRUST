@@ -1,73 +1,85 @@
-import { collection, doc, getDocs, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { getFromStorage, saveToStorage, KEYS } from './storageService';
 import { INITIAL_VOLUNTEERS } from '../data/mockData';
+import { activityService } from './activityService';
 
 export const volunteerService = {
-  // Get all volunteer applications (from storage)
+  // Real-time Firestore listener for all volunteers
+  subscribeVolunteers: (callback, onError) => {
+    try {
+      const colRef = collection(db, 'volunteers');
+      const unsubscribe = onSnapshot(
+        colRef,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach((docSnap) => {
+              list.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            list.sort((a, b) => new Date(b.appliedDate || 0) - new Date(a.appliedDate || 0));
+            saveToStorage(KEYS.VOLUNTEERS, list);
+            callback(list);
+          } else {
+            // Seed initial mock volunteers if Firestore is empty
+            volunteerService.seedInitialVolunteers();
+            const cached = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
+            callback(cached);
+          }
+        },
+        (error) => {
+          console.warn('Firestore subscribeVolunteers error:', error);
+          if (onError) onError(error);
+          const cached = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
+          callback(cached);
+        }
+      );
+      return unsubscribe;
+    } catch (err) {
+      console.warn('subscribeVolunteers setup error:', err);
+      const cached = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
+      callback(cached);
+      return () => {};
+    }
+  },
+
+  // Seed default volunteers to Firestore if empty
+  seedInitialVolunteers: async () => {
+    try {
+      const snap = await getDocs(collection(db, 'volunteers'));
+      if (snap.empty) {
+        for (const item of INITIAL_VOLUNTEERS) {
+          await setDoc(doc(db, 'volunteers', item.id), item);
+        }
+      }
+    } catch (e) {
+      console.warn('Seeding initial volunteers note:', e);
+    }
+  },
+
+  // Get cached volunteers
   getVolunteers: () => {
     return getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
   },
 
-  // Fetch live volunteers and registered volunteer accounts from Firestore
+  // Fetch live volunteers once
   fetchVolunteers: async () => {
     let combinedVolunteers = [...getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS)];
-    const existingEmails = new Set(combinedVolunteers.map((v) => v.email?.toLowerCase()));
-
     try {
-      // 1. Fetch from Firestore 'volunteers' collection
       const volSnap = await getDocs(collection(db, 'volunteers'));
       if (!volSnap.empty) {
+        const firestoreList = [];
         volSnap.forEach((docSnap) => {
-          const data = { id: docSnap.id, ...docSnap.data() };
-          const emailLower = data.email?.toLowerCase();
-          const existingIdx = combinedVolunteers.findIndex((v) => v.email?.toLowerCase() === emailLower);
-          if (existingIdx !== -1) {
-            combinedVolunteers[existingIdx] = { ...combinedVolunteers[existingIdx], ...data };
-          } else {
-            combinedVolunteers.unshift(data);
-            if (emailLower) existingEmails.add(emailLower);
-          }
+          firestoreList.push({ id: docSnap.id, ...docSnap.data() });
         });
+        firestoreList.sort((a, b) => new Date(b.appliedDate || 0) - new Date(a.appliedDate || 0));
+        saveToStorage(KEYS.VOLUNTEERS, firestoreList);
+        return firestoreList;
       }
-
-      // 2. Fetch from Firestore 'users' collection where role === 'Volunteer'
-      const usersSnap = await getDocs(collection(db, 'users'));
-      if (!usersSnap.empty) {
-        usersSnap.forEach((docSnap) => {
-          const user = { id: docSnap.id, ...docSnap.data() };
-          const emailLower = user.email?.toLowerCase();
-          if (user.role === 'Volunteer' && emailLower && !existingEmails.has(emailLower)) {
-            const volEntry = {
-              id: `VOL-${user.uid ? user.uid.slice(0, 5) : Math.floor(100 + Math.random() * 900)}`,
-              name: user.name || emailLower.split('@')[0],
-              email: user.email,
-              phone: user.phone || '+92 300 0000000',
-              address: '',
-              city: user.city || 'Online Volunteer',
-              skills: ['Community Support', 'Field Aid'],
-              areaOfInterest: 'General Assistance',
-              availability: 'Flexible',
-              experience: 'Registered via Firebase Auth',
-              message: 'Volunteer account created on HopeBridge portal.',
-              status: 'Pending',
-              appliedDate: user.joinedDate || new Date().toISOString().split('T')[0],
-              approvedDate: null,
-              assignedCampaign: null,
-              hoursContributed: 0
-            };
-            combinedVolunteers.unshift(volEntry);
-            existingEmails.add(emailLower);
-          }
-        });
-      }
-
-      saveToStorage(KEYS.VOLUNTEERS, combinedVolunteers);
-      return combinedVolunteers;
     } catch (err) {
       console.warn('Firestore fetchVolunteers note:', err);
-      return combinedVolunteers;
     }
+    return combinedVolunteers;
   },
 
   // Get volunteer by ID
@@ -76,9 +88,8 @@ export const volunteerService = {
     return volunteers.find((v) => v.id === id) || null;
   },
 
-  // Submit volunteer application
+  // Submit volunteer application into Firestore
   applyVolunteer: async (formData) => {
-    const volunteers = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
     const newId = `VOL-${Math.floor(100 + Math.random() * 900)}`;
 
     const newVolunteer = {
@@ -91,8 +102,8 @@ export const volunteerService = {
       skills: Array.isArray(formData.skills) ? formData.skills : (formData.skills ? formData.skills.split(',').map((s) => s.trim()) : ['General Support']),
       areaOfInterest: formData.areaOfInterest || 'General Assistance',
       availability: formData.availability || 'Weekends',
-      experience: formData.experience || 'No previous NGO experience stated.',
-      message: formData.message || 'Looking forward to supporting the community.',
+      experience: formData.experience || 'Looking forward to volunteering.',
+      message: formData.message || 'Support for GiveHope relief activities.',
       status: 'Pending',
       appliedDate: new Date().toISOString().split('T')[0],
       approvedDate: null,
@@ -100,19 +111,32 @@ export const volunteerService = {
       hoursContributed: 0
     };
 
+    // Update local cache optimistically
+    const volunteers = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
     volunteers.unshift(newVolunteer);
     saveToStorage(KEYS.VOLUNTEERS, volunteers);
 
+    // Sync to Firestore
     try {
       await setDoc(doc(db, 'volunteers', newId), newVolunteer);
     } catch (err) {
       console.warn('Firestore setDoc volunteer note:', err);
     }
 
+    // Log Activity in Firestore
+    activityService.logActivity({
+      type: 'volunteer_applied',
+      title: 'New Volunteer Application',
+      description: `${newVolunteer.name} applied as a volunteer (${newVolunteer.areaOfInterest})`,
+      actor: newVolunteer.name,
+      icon: 'HandHeart',
+      meta: { volunteerId: newId }
+    });
+
     return { success: true, volunteer: newVolunteer };
   },
 
-  // Approve / Reject / Update volunteer status
+  // Approve / Reject / Update volunteer status in Firestore
   updateVolunteerStatus: async (id, status, assignedCampaign = null) => {
     const volunteers = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
     const index = volunteers.findIndex((v) => v.id === id);
@@ -141,6 +165,15 @@ export const volunteerService = {
       console.warn('Firestore updateDoc volunteer note:', err);
     }
 
+    activityService.logActivity({
+      type: status === 'Approved' ? 'volunteer_approved' : 'volunteer_rejected',
+      title: `Volunteer Application ${status}`,
+      description: `${volunteers[index].name} was ${status.toLowerCase()} by coordinator.`,
+      actor: 'Admin',
+      icon: status === 'Approved' ? 'Check' : 'X',
+      meta: { volunteerId: id, status }
+    });
+
     return { success: true, volunteer: volunteers[index] };
   },
 
@@ -159,11 +192,11 @@ export const volunteerService = {
     return { success: true };
   },
 
-  // Get volunteer statistics
-  getVolunteerStats: () => {
-    const volunteers = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
+  // Get volunteer statistics from a list (or cache)
+  getVolunteerStats: (customList = null) => {
+    const volunteers = customList || getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
     const approved = volunteers.filter((v) => v.status === 'Approved');
-    const totalHours = approved.reduce((sum, v) => sum + (v.hoursContributed || 0), 0);
+    const totalHours = approved.reduce((sum, v) => sum + (Number(v.hoursContributed) || 0), 0);
 
     return {
       total: volunteers.length,
@@ -174,3 +207,5 @@ export const volunteerService = {
     };
   }
 };
+
+export default volunteerService;

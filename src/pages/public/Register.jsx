@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { ButtonLoader } from '../../components/common/ButtonLoader';
 import { 
   Heart, 
   Mail, 
@@ -62,7 +63,7 @@ export const Register = () => {
     setSubmitting(false);
 
     if (res.success) {
-      showToast('Account Created!', `Welcome to HopeBridge, ${res.user.name}!`, 'success');
+      showToast('Account Created!', `Welcome to GiveHope, ${res.user.name}!`, 'success');
       navigate('/');
     } else {
       showToast('Registration Error', res.error || 'Failed to create account.', 'error');
@@ -112,7 +113,7 @@ export const Register = () => {
               Create an Account
             </h1>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-              Join HopeBridge as a registered Donor or Volunteer
+              Join GiveHope as a registered Donor or Volunteer
             </p>
           </div>
 
@@ -295,7 +296,12 @@ export const Register = () => {
               className="btn btn-lg btn-primary"
               style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.5rem' }}
             >
-              <UserPlus size={18} /> {submitting ? 'Creating Firebase Account...' : 'Register Account'}
+              <ButtonLoader loading={submitting} loadingText="Creating Account...">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <UserPlus size={18} />
+                  <span>Register Account</span>
+                </span>
+              </ButtonLoader>
             </button>
           </form>
 

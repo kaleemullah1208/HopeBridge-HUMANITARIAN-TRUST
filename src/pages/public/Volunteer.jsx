@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { volunteerService } from '../../services/volunteerService';
 import { useToast } from '../../context/ToastContext';
+import { ButtonLoader } from '../../components/common/ButtonLoader';
 import confetti from 'canvas-confetti';
 import { 
   HandHeart, 
@@ -106,7 +107,7 @@ export const Volunteer = () => {
             Be the Hands That Heal & Empower
           </h1>
           <p style={{ fontSize: '1.1rem', color: '#CBD5E1', lineHeight: '1.7' }}>
-            Volunteers are the backbone of HopeBridge. Whether you have 2 hours a week or full-time availability, your passion can transform a struggling family's future.
+            Volunteers are the backbone of GiveHope. Whether you have 2 hours a week or full-time availability, your passion can transform a struggling family's future.
           </p>
         </div>
       </section>
@@ -218,7 +219,7 @@ export const Volunteer = () => {
               </div>
 
               <h2 style={{ fontSize: '1.8rem', color: 'var(--navy)' }}>
-                Welcome to the HopeBridge Family!
+                Welcome to the GiveHope Family!
               </h2>
 
               <p style={{ color: 'var(--text-muted)', maxWidth: '520px', lineHeight: '1.7' }}>
@@ -408,7 +409,7 @@ export const Volunteer = () => {
 
                 {/* Motivation Message */}
                 <div className="form-group">
-                  <label className="form-label">Why do you want to join HopeBridge?</label>
+                  <label className="form-label">Why do you want to join GiveHope?</label>
                   <textarea
                     rows={2}
                     placeholder="What motivates you to volunteer with us?"
@@ -425,7 +426,12 @@ export const Volunteer = () => {
                   className="btn btn-lg btn-primary"
                   style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.5rem' }}
                 >
-                  <Send size={18} /> {submitting ? 'Registering Application...' : 'Submit Volunteer Application'}
+                  <ButtonLoader loading={submitting} loadingText="Registering Application...">
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Send size={18} />
+                      <span>Submit Volunteer Application</span>
+                    </span>
+                  </ButtonLoader>
                 </button>
               </form>
             </div>

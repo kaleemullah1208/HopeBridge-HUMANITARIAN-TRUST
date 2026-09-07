@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { ButtonLoader } from '../../components/common/ButtonLoader';
 import { 
   Heart, 
   Mail, 
@@ -105,7 +106,7 @@ export const Login = () => {
               <Heart size={26} fill="#FFFFFF" />
             </div>
             <h1 style={{ fontSize: '1.75rem', color: 'var(--navy)', marginBottom: '0.35rem' }}>
-              Sign In to HopeBridge
+              Sign In to GiveHope
             </h1>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
               Firebase Authentication enabled for Donors, Volunteers & Admin
@@ -215,7 +216,12 @@ export const Login = () => {
               className="btn btn-lg btn-primary"
               style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.5rem' }}
             >
-              <LogIn size={18} /> {submitting ? 'Authenticating with Firebase...' : 'Sign In'}
+              <ButtonLoader loading={submitting} loadingText="Authenticating...">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <LogIn size={18} />
+                  <span>Sign In</span>
+                </span>
+              </ButtonLoader>
             </button>
           </form>
 

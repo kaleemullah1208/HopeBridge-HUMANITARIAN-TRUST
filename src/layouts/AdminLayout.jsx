@@ -102,7 +102,7 @@ export const AdminLayout = () => {
               </div>
               <div>
                 <div style={{ fontWeight: '800', fontSize: '1.1rem', color: '#FFFFFF', lineHeight: 1.1 }}>
-                  Hope<span style={{ color: 'var(--primary)' }}>Admin</span>
+                  Give<span style={{ color: 'var(--primary)' }}>Hope</span> <span style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: '600' }}>Admin</span>
                 </div>
                 <div style={{ fontSize: '0.65rem', color: '#94A3B8', letterSpacing: '0.04em' }}>
                   MANAGEMENT CONSOLE
@@ -425,7 +425,7 @@ export const AdminLayout = () => {
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
               <div style={{ fontWeight: '800', fontSize: '1.2rem' }}>
-                Hope<span style={{ color: 'var(--primary)' }}>Admin</span>
+                Give<span style={{ color: 'var(--primary)' }}>Hope</span> <span style={{ fontSize: '0.85rem', color: '#94A3B8', fontWeight: '600' }}>Admin</span>
               </div>
               <button
                 onClick={() => setMobileSidebarOpen(false)}
