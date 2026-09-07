@@ -35,8 +35,10 @@ export const Settings = () => {
   const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
-    const data = settingsService.getSettings();
-    setSettings(data);
+    const unsub = settingsService.subscribeSettings((data) => {
+      setSettings(data);
+    });
+    return () => unsub();
   }, []);
 
   const handleSaveOrgSettings = async (e) => {

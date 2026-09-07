@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { reportService } from '../../services/reportService';
+import { donationService } from '../../services/donationService';
+import { volunteerService } from '../../services/volunteerService';
+import { campaignService } from '../../services/campaignService';
 import { useToast } from '../../context/ToastContext';
 import { 
   BarChart, Bar, AreaChart, Area, LineChart, Line, PieChart, Pie, Cell,
@@ -15,14 +18,33 @@ import {
   Users, 
   HeartHandshake, 
   ShieldCheck,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Radio
 } from 'lucide-react';
 import { MONTHLY_ANALYTICS_DATA, CATEGORY_DISTRIBUTION } from '../../data/mockData';
 
 export const ReportsAnalytics = () => {
   const [timeframe, setTimeframe] = useState('year');
+  const [summary, setSummary] = useState(() => reportService.getReportSummary('year'));
   const { showToast } = useToast();
-  const summary = reportService.getReportSummary(timeframe);
+
+  useEffect(() => {
+    const unsubDon = donationService.subscribeDonations(() => {
+      setSummary(reportService.getReportSummary(timeframe));
+    });
+    const unsubVol = volunteerService.subscribeVolunteers(() => {
+      setSummary(reportService.getReportSummary(timeframe));
+    });
+    const unsubCamp = campaignService.subscribeCampaigns(() => {
+      setSummary(reportService.getReportSummary(timeframe));
+    });
+
+    return () => {
+      unsubDon();
+      unsubVol();
+      unsubCamp();
+    };
+  }, [timeframe]);
 
   const handlePrint = () => {
     window.print();
@@ -44,8 +66,27 @@ export const ReportsAnalytics = () => {
       {/* Top Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }} className="no-print">
         <div>
-          <h1 style={{ fontSize: '1.85rem', color: 'var(--navy)' }}>Audit Reports & Performance Analytics</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <h1 style={{ fontSize: '1.85rem', color: 'var(--navy)', margin: 0 }}>
+              Audit Reports & Performance Analytics
+            </h1>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              backgroundColor: 'var(--status-success-bg)',
+              color: 'var(--status-success-text)',
+              border: '1px solid var(--status-success-border)',
+              borderRadius: 'var(--radius-full)',
+              padding: '0.2rem 0.65rem',
+              fontSize: '0.75rem',
+              fontWeight: '700'
+            }}>
+              <Radio size={12} className="pulse-glow" style={{ color: 'var(--status-success)' }} />
+              Live Sync
+            </span>
+          </div>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.35rem' }}>
             Comprehensive financial transparency, monthly trends, and volunteer impact intelligence.
           </p>
         </div>
