@@ -9,6 +9,7 @@ import { Badge } from '../../components/common/Badge';
 import { 
   Heart, 
   HandHeart, 
+  HeartHandshake,
   ShieldCheck, 
   Users, 
   Flame, 
