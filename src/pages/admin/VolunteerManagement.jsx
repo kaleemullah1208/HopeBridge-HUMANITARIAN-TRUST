@@ -25,7 +25,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Radio,
-  UserCheck
+  UserCheck,
+  Loader2
 } from 'lucide-react';
 
 export const VolunteerManagement = () => {
@@ -37,10 +38,11 @@ export const VolunteerManagement = () => {
   const [interestFilter, setInterestFilter] = useState('All');
   const [initialLoading, setInitialLoading] = useState(true);
   
-  // Detail Modal
+  // Detail Modal & Action State
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [assignedCampaign, setAssignedCampaign] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
 
   const { showToast } = useToast();
 
@@ -73,34 +75,61 @@ export const VolunteerManagement = () => {
 
   const handleApprove = async (id, name, campaign = null) => {
     setActionLoading(true);
+    setActionLoadingId(id);
+
+    // Optimistic UI state update
+    setVolunteers((prev) => 
+      prev.map((v) => (v.id === id ? { ...v, status: 'Approved', approvedDate: new Date().toISOString().split('T')[0], assignedCampaign: campaign || v.assignedCampaign } : v))
+    );
+
     const res = await volunteerService.updateVolunteerStatus(id, 'Approved', campaign);
     setActionLoading(false);
+    setActionLoadingId(null);
+
     if (res.success) {
-      showToast('Volunteer Approved', `${name} is now approved in Firestore!`, 'success');
+      showToast('Volunteer Approved', `${name} is now approved & verified in Firestore!`, 'success');
       if (selectedVolunteer && selectedVolunteer.id === id) {
         setSelectedVolunteer(res.volunteer);
       }
+    } else {
+      showToast('Approval Error', res.error || 'Could not approve volunteer.', 'error');
     }
   };
 
   const handleReject = async (id, name) => {
     setActionLoading(true);
+    setActionLoadingId(id);
+
+    // Optimistic UI state update
+    setVolunteers((prev) => 
+      prev.map((v) => (v.id === id ? { ...v, status: 'Rejected' } : v))
+    );
+
     const res = await volunteerService.updateVolunteerStatus(id, 'Rejected');
     setActionLoading(false);
+    setActionLoadingId(null);
+
     if (res.success) {
       showToast('Application Rejected', `Application for ${name} has been rejected.`, 'info');
       if (selectedVolunteer && selectedVolunteer.id === id) {
         setSelectedVolunteer(res.volunteer);
       }
+    } else {
+      showToast('Rejection Error', res.error || 'Could not reject application.', 'error');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this volunteer application?')) {
+    if (window.confirm('Are you sure you want to permanently delete this volunteer record?')) {
       const res = await volunteerService.deleteVolunteer(id);
       if (res.success) {
-        showToast('Record Removed', 'Volunteer application deleted from Firestore.', 'info');
-        setSelectedVolunteer(null);
+        showToast('Record Removed', 'Volunteer record deleted from Firestore.', 'info');
+        setVolunteers((prev) => prev.filter((v) => v.id !== id));
+        if (selectedVolunteer && selectedVolunteer.id === id) {
+          setSelectedVolunteer(null);
+        }
+      } else {
+        showToast('Delete Error', res.error || 'Could not delete volunteer.', 'error');
       }
     }
   };
@@ -147,7 +176,7 @@ export const VolunteerManagement = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <h1 style={{ fontSize: '1.85rem', color: 'var(--navy)', margin: 0 }}>
+            <h1 style={{ fontSize: '1.85rem', color: 'var(--navy)', margin: 0, fontWeight: '800' }}>
               Volunteer Force & Deployment
             </h1>
             <span style={{
@@ -181,8 +210,8 @@ export const VolunteerManagement = () => {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-4 gap-6">
-        <div className="card" style={{ padding: '1.25rem' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="card" style={{ padding: '1.25rem', borderRadius: '16px' }}>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>
             Total Applications
           </div>
@@ -194,7 +223,7 @@ export const VolunteerManagement = () => {
           </div>
         </div>
 
-        <div className="card" style={{ padding: '1.25rem' }}>
+        <div className="card" style={{ padding: '1.25rem', borderRadius: '16px' }}>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>
             Active & Certified
           </div>
@@ -206,7 +235,7 @@ export const VolunteerManagement = () => {
           </div>
         </div>
 
-        <div className="card" style={{ padding: '1.25rem' }}>
+        <div className="card" style={{ padding: '1.25rem', borderRadius: '16px' }}>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>
             Pending Reviews
           </div>
@@ -218,7 +247,7 @@ export const VolunteerManagement = () => {
           </div>
         </div>
 
-        <div className="card" style={{ padding: '1.25rem' }}>
+        <div className="card" style={{ padding: '1.25rem', borderRadius: '16px' }}>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>
             Total Service Hours
           </div>
@@ -232,7 +261,7 @@ export const VolunteerManagement = () => {
       </div>
 
       {/* Tabs & Filters */}
-      <div className="card" style={{ padding: '1.25rem' }}>
+      <div className="card" style={{ padding: '1.25rem', borderRadius: '16px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {/* Status Tabs */}
           <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
@@ -290,10 +319,12 @@ export const VolunteerManagement = () => {
       </div>
 
       {/* Main Table */}
-      <div className="card">
+      <div className="card" style={{ borderRadius: '16px', overflow: 'hidden' }}>
         <div className="card-header">
           <div>
-            <h3 style={{ fontSize: '1.15rem', color: 'var(--navy)' }}>Volunteer Directory ({filteredVolunteers.length})</h3>
+            <h3 style={{ fontSize: '1.15rem', color: 'var(--navy)', fontWeight: '700' }}>
+              Volunteer Directory ({filteredVolunteers.length})
+            </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Real-time synchronization with online submissions</p>
           </div>
         </div>
@@ -305,7 +336,7 @@ export const VolunteerManagement = () => {
             <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-muted)' }}>
               <AlertCircle size={36} style={{ margin: '0 auto 0.75rem auto', color: 'var(--text-light)' }} />
               <div style={{ fontWeight: '600', fontSize: '1.05rem', color: 'var(--navy)' }}>No volunteers found</div>
-              <p style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>No volunteer applications matched your criteria.</p>
+              <p style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>No volunteer applications matched your search criteria.</p>
             </div>
           ) : (
             <table className="table">
@@ -323,7 +354,7 @@ export const VolunteerManagement = () => {
                 {filteredVolunteers.map((v) => (
                   <tr key={v.id}>
                     <td>
-                      <div style={{ fontWeight: '600', color: 'var(--navy)' }}>{v.name}</div>
+                      <div style={{ fontWeight: '700', color: 'var(--navy)' }}>{v.name}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{v.email}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-light)' }}>{v.phone} • {v.city || 'Lahore'}</div>
                     </td>
@@ -365,19 +396,26 @@ export const VolunteerManagement = () => {
                           <>
                             <button
                               onClick={() => handleApprove(v.id, v.name)}
+                              disabled={actionLoadingId === v.id}
                               className="btn btn-sm btn-primary"
-                              style={{ padding: '0.3rem 0.5rem', backgroundColor: 'var(--status-success)', borderColor: 'var(--status-success)' }}
+                              style={{ 
+                                padding: '0.3rem 0.5rem', 
+                                backgroundColor: '#10B981', 
+                                borderColor: '#10B981',
+                                opacity: actionLoadingId === v.id ? 0.7 : 1
+                              }}
                               title="Quick Approve"
                             >
-                              <Check size={14} />
+                              {actionLoadingId === v.id ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                             </button>
                             <button
                               onClick={() => handleReject(v.id, v.name)}
+                              disabled={actionLoadingId === v.id}
                               className="btn btn-sm btn-danger-outline"
                               style={{ padding: '0.3rem 0.5rem' }}
                               title="Reject Application"
                             >
-                              <X size={14} />
+                              {actionLoadingId === v.id ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
                             </button>
                           </>
                         )}
@@ -419,14 +457,16 @@ export const VolunteerManagement = () => {
               borderRadius: 'var(--radius-md)'
             }}>
               <div>
-                <h3 style={{ fontSize: '1.2rem', color: 'var(--navy)', marginBottom: '0.2rem' }}>{selectedVolunteer.name}</h3>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Reference ID: {selectedVolunteer.id}</div>
+                <h3 style={{ fontSize: '1.2rem', color: 'var(--navy)', marginBottom: '0.2rem', fontWeight: '800' }}>
+                  {selectedVolunteer.name}
+                </h3>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Reference ID: <strong className="font-mono">{selectedVolunteer.id}</strong></div>
               </div>
               <Badge variant={selectedVolunteer.status}>{selectedVolunteer.status}</Badge>
             </div>
 
             {/* Grid Information */}
-            <div className="grid grid-cols-2 gap-4" style={{ fontSize: '0.88rem' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" style={{ fontSize: '0.88rem' }}>
               <div>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', display: 'block' }}>Email Address</span>
                 <strong>{selectedVolunteer.email}</strong>
@@ -441,7 +481,7 @@ export const VolunteerManagement = () => {
               </div>
               <div>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', display: 'block' }}>Application Date</span>
-                <span>{selectedVolunteer.appliedDate}</span>
+                <span>{selectedVolunteer.appliedDate || 'Recent'}</span>
               </div>
               <div>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', display: 'block' }}>Area of Interest</span>
@@ -467,7 +507,7 @@ export const VolunteerManagement = () => {
             <div style={{ backgroundColor: '#F8FAFC', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }}>
               <div style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--navy)', marginBottom: '0.25rem' }}>Background & Motivation</div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5', margin: 0 }}>
-                "{selectedVolunteer.message || selectedVolunteer.experience}"
+                "{selectedVolunteer.message || selectedVolunteer.experience || 'Ready to serve in GiveHope relief drives.'}"
               </p>
             </div>
 
@@ -487,7 +527,7 @@ export const VolunteerManagement = () => {
             </div>
 
             {/* Footer Buttons */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
               <button className="btn btn-secondary" onClick={() => setSelectedVolunteer(null)}>
                 Close
               </button>
@@ -495,6 +535,7 @@ export const VolunteerManagement = () => {
               {selectedVolunteer.status !== 'Rejected' && (
                 <button
                   className="btn btn-danger-outline"
+                  disabled={actionLoading}
                   onClick={() => handleReject(selectedVolunteer.id, selectedVolunteer.name)}
                 >
                   Reject Application
@@ -502,16 +543,19 @@ export const VolunteerManagement = () => {
               )}
 
               {selectedVolunteer.status !== 'Approved' && (
-                <ButtonLoader
-                  loading={actionLoading}
-                  loadingText="Approving..."
+                <button
+                  disabled={actionLoading}
                   className="btn btn-primary"
-                  style={{ backgroundColor: 'var(--status-success)', borderColor: 'var(--status-success)' }}
+                  style={{ backgroundColor: '#10B981', borderColor: '#10B981', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                   onClick={() => handleApprove(selectedVolunteer.id, selectedVolunteer.name, assignedCampaign)}
-                  icon={<UserCheck size={16} />}
                 >
-                  Approve & Certify
-                </ButtonLoader>
+                  <ButtonLoader loading={actionLoading} loadingText="Approving...">
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <UserCheck size={16} />
+                      <span>Approve & Certify</span>
+                    </span>
+                  </ButtonLoader>
+                </button>
               )}
             </div>
           </div>

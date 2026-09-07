@@ -1,11 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 import { authService } from '../services/authService';
 import { initializeStorage, getFromStorage, saveToStorage, KEYS } from '../services/storageService';
 
 const AuthContext = createContext(null);
+
+const ADMIN_EMAILS = [
+  'admin@gmail.com',
+  'admin@ngo.org',
+  'admin@givehope.ngo',
+  'admin@hopebridge.org',
+  'admin@admin.com'
+];
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => getFromStorage(KEYS.CURRENT_USER, null));
@@ -18,15 +26,21 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
+          const email = firebaseUser.email ? firebaseUser.email.toLowerCase() : '';
+          const isAdminEmail = ADMIN_EMAILS.includes(email);
           const userDocRef = doc(db, 'users', firebaseUser.uid);
           const docSnap = await getDoc(userDocRef);
           
           let profile;
-          const email = firebaseUser.email ? firebaseUser.email.toLowerCase() : '';
-          const isAdminEmail = email === 'admin@gmail.com' || email === 'admin@ngo.org' || email === 'admin@givehope.ngo';
 
           if (docSnap.exists()) {
-            profile = docSnap.data();
+            profile = { id: firebaseUser.uid, uid: firebaseUser.uid, ...docSnap.data() };
+            if (isAdminEmail && profile.role !== 'Admin') {
+              profile.role = 'Admin';
+              try {
+                await setDoc(userDocRef, { role: 'Admin' }, { merge: true });
+              } catch (e) {}
+            }
           } else {
             profile = {
               id: firebaseUser.uid,
@@ -37,6 +51,9 @@ export const AuthProvider = ({ children }) => {
               avatar: firebaseUser.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
               joinedDate: new Date().toISOString().split('T')[0]
             };
+            try {
+              await setDoc(userDocRef, profile, { merge: true });
+            } catch (e) {}
           }
 
           setCurrentUser(profile);
@@ -112,6 +129,10 @@ export const AuthProvider = ({ children }) => {
     return result;
   };
 
+  const userEmail = currentUser?.email ? currentUser.email.toLowerCase() : '';
+  const userRole = currentUser?.role ? currentUser.role.toLowerCase() : '';
+  const isAdmin = userRole === 'admin' || ADMIN_EMAILS.includes(userEmail);
+
   const value = {
     currentUser,
     loading,
@@ -121,10 +142,10 @@ export const AuthProvider = ({ children }) => {
     logout,
     switchRole,
     updateProfile,
-    isAdmin: currentUser?.role === 'Admin' || currentUser?.email?.toLowerCase() === 'admin@gmail.com' || currentUser?.email?.toLowerCase() === 'admin@ngo.org' || currentUser?.email?.toLowerCase() === 'admin@givehope.ngo',
-    isVolunteer: currentUser?.role === 'Volunteer',
-    isDonor: currentUser?.role === 'Donor',
-    isBeneficiary: currentUser?.role === 'Beneficiary',
+    isAdmin,
+    isVolunteer: userRole === 'volunteer',
+    isDonor: userRole === 'donor',
+    isBeneficiary: userRole === 'beneficiary',
     isAuthenticated: !!currentUser
   };
 
@@ -138,3 +159,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export default AuthContext;

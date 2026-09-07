@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { getFromStorage, saveToStorage, KEYS } from './storageService';
 import { INITIAL_VOLUNTEERS } from '../data/mockData';
@@ -21,7 +21,7 @@ export const volunteerService = {
             saveToStorage(KEYS.VOLUNTEERS, list);
             callback(list);
           } else {
-            // Seed initial mock volunteers if Firestore is empty
+            // Seed initial mock volunteers if Firestore is completely empty
             volunteerService.seedInitialVolunteers();
             const cached = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
             callback(cached);
@@ -49,7 +49,7 @@ export const volunteerService = {
       const snap = await getDocs(collection(db, 'volunteers'));
       if (snap.empty) {
         for (const item of INITIAL_VOLUNTEERS) {
-          await setDoc(doc(db, 'volunteers', item.id), item);
+          await setDoc(doc(db, 'volunteers', item.id), item, { merge: true });
         }
       }
     } catch (e) {
@@ -118,7 +118,7 @@ export const volunteerService = {
 
     // Sync to Firestore
     try {
-      await setDoc(doc(db, 'volunteers', newId), newVolunteer);
+      await setDoc(doc(db, 'volunteers', newId), newVolunteer, { merge: true });
     } catch (err) {
       console.warn('Firestore setDoc volunteer note:', err);
     }
@@ -140,41 +140,72 @@ export const volunteerService = {
   updateVolunteerStatus: async (id, status, assignedCampaign = null) => {
     const volunteers = getFromStorage(KEYS.VOLUNTEERS, INITIAL_VOLUNTEERS);
     const index = volunteers.findIndex((v) => v.id === id);
+    const nowIso = new Date().toISOString().split('T')[0];
 
-    if (index === -1) {
-      return { success: false, error: 'Volunteer record not found' };
-    }
+    let targetVolunteer;
 
-    volunteers[index].status = status;
-    if (status === 'Approved' && !volunteers[index].approvedDate) {
-      volunteers[index].approvedDate = new Date().toISOString().split('T')[0];
-    }
-    if (assignedCampaign) {
-      volunteers[index].assignedCampaign = assignedCampaign;
+    if (index !== -1) {
+      volunteers[index].status = status;
+      if (status === 'Approved' && !volunteers[index].approvedDate) {
+        volunteers[index].approvedDate = nowIso;
+      }
+      if (assignedCampaign) {
+        volunteers[index].assignedCampaign = assignedCampaign;
+      }
+      targetVolunteer = { ...volunteers[index] };
+    } else {
+      targetVolunteer = {
+        id,
+        status,
+        approvedDate: status === 'Approved' ? nowIso : null,
+        assignedCampaign: assignedCampaign || null
+      };
+      volunteers.unshift(targetVolunteer);
     }
 
     saveToStorage(KEYS.VOLUNTEERS, volunteers);
 
-    try {
-      await updateDoc(doc(db, 'volunteers', id), {
-        status: volunteers[index].status,
-        approvedDate: volunteers[index].approvedDate,
-        assignedCampaign: volunteers[index].assignedCampaign
-      });
-    } catch (err) {
-      console.warn('Firestore updateDoc volunteer note:', err);
+    // Prepare Firestore update payload
+    const updatePayload = {
+      status: targetVolunteer.status,
+      approvedDate: targetVolunteer.approvedDate || null,
+      updatedAt: new Date().toISOString()
+    };
+    if (assignedCampaign) {
+      updatePayload.assignedCampaign = assignedCampaign;
     }
 
+    // Write to Firestore with setDoc merge
+    try {
+      await setDoc(doc(db, 'volunteers', id), updatePayload, { merge: true });
+    } catch (err) {
+      console.warn('Firestore setDoc volunteer status note:', err);
+    }
+
+    // If volunteer record matches a user, update their profile in Firestore too
+    if (targetVolunteer.userId || targetVolunteer.applicantId) {
+      try {
+        const uid = targetVolunteer.userId || targetVolunteer.applicantId;
+        await setDoc(doc(db, 'users', uid), {
+          role: 'Volunteer',
+          volunteerStatus: status
+        }, { merge: true });
+      } catch (uErr) {
+        console.warn('Firestore users update note:', uErr);
+      }
+    }
+
+    // Log Activity
     activityService.logActivity({
       type: status === 'Approved' ? 'volunteer_approved' : 'volunteer_rejected',
       title: `Volunteer Application ${status}`,
-      description: `${volunteers[index].name} was ${status.toLowerCase()} by coordinator.`,
+      description: `${targetVolunteer.name || id} was ${status.toLowerCase()} by administrator.`,
       actor: 'Admin',
       icon: status === 'Approved' ? 'Check' : 'X',
       meta: { volunteerId: id, status }
     });
 
-    return { success: true, volunteer: volunteers[index] };
+    return { success: true, volunteer: targetVolunteer };
   },
 
   // Delete volunteer record

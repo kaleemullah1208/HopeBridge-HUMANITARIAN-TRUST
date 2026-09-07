@@ -84,6 +84,48 @@
 }
 
 /* ==========================================================================
+   PREMIUM GIVEHOPE LOADER ANIMATIONS
+   ========================================================================== */
+@keyframes giveHopePulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.5), 0 0 25px rgba(13, 148, 136, 0.3);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 16px rgba(13, 148, 136, 0), 0 0 45px rgba(13, 148, 136, 0.55);
+  }
+}
+
+@keyframes dualRingSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes reverseSpin {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.22); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.18); }
+  70% { transform: scale(1); }
+}
+
+@keyframes waveShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ==========================================================================
    BASE RESET & TYPOGRAPHY
    ========================================================================== */
 

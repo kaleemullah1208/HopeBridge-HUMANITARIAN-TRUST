@@ -74,13 +74,21 @@ export const App = () => {
         }
       >
         <Route index element={<DashboardHome />} />
+        <Route path="dashboard" element={<DashboardHome />} />
         <Route path="donations" element={<DonationsManagement />} />
+        <Route path="donation" element={<Navigate to="/admin/donations" replace />} />
         <Route path="aid-requests" element={<AidRequestsManagement />} />
+        <Route path="aid" element={<Navigate to="/admin/aid-requests" replace />} />
         <Route path="volunteers" element={<VolunteerManagement />} />
+        <Route path="volunteer" element={<Navigate to="/admin/volunteers" replace />} />
         <Route path="campaigns" element={<CampaignManagement />} />
+        <Route path="campaign" element={<Navigate to="/admin/campaigns" replace />} />
         <Route path="donors" element={<DonorManagement />} />
+        <Route path="donor" element={<Navigate to="/admin/donors" replace />} />
         <Route path="reports" element={<ReportsAnalytics />} />
+        <Route path="analytics" element={<Navigate to="/admin/reports" replace />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
       </Route>
 
       {/* 404 Catch-All */}
