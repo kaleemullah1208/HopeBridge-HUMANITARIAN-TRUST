@@ -22,26 +22,36 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     initializeStorage();
 
+    // Safety timeout: ensure loading becomes false after max 1.2s to prevent white/frozen screens
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 1200);
+
     // Listen for Firebase Auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
+      try {
+        if (firebaseUser) {
           const email = firebaseUser.email ? firebaseUser.email.toLowerCase() : '';
           const isAdminEmail = ADMIN_EMAILS.includes(email);
           const userDocRef = doc(db, 'users', firebaseUser.uid);
-          const docSnap = await getDoc(userDocRef);
           
           let profile;
-
-          if (docSnap.exists()) {
-            profile = { id: firebaseUser.uid, uid: firebaseUser.uid, ...docSnap.data() };
-            if (isAdminEmail && profile.role !== 'Admin') {
-              profile.role = 'Admin';
-              try {
-                await setDoc(userDocRef, { role: 'Admin' }, { merge: true });
-              } catch (e) {}
+          try {
+            const docSnap = await getDoc(userDocRef);
+            if (docSnap.exists()) {
+              profile = { id: firebaseUser.uid, uid: firebaseUser.uid, ...docSnap.data() };
+              if (isAdminEmail && profile.role !== 'Admin') {
+                profile.role = 'Admin';
+                try {
+                  await setDoc(userDocRef, { role: 'Admin' }, { merge: true });
+                } catch (e) {}
+              }
             }
-          } else {
+          } catch (dbErr) {
+            console.warn('Firestore doc read note:', dbErr);
+          }
+
+          if (!profile) {
             profile = {
               id: firebaseUser.uid,
               uid: firebaseUser.uid,
@@ -58,25 +68,26 @@ export const AuthProvider = ({ children }) => {
 
           setCurrentUser(profile);
           saveToStorage(KEYS.CURRENT_USER, profile);
-        } catch (error) {
-          console.warn('Error fetching Firestore user profile on auth change:', error);
+        } else {
           const localUser = getFromStorage(KEYS.CURRENT_USER);
           if (localUser) {
             setCurrentUser(localUser);
+          } else {
+            setCurrentUser(null);
           }
         }
-      } else {
-        const localUser = getFromStorage(KEYS.CURRENT_USER);
-        if (localUser) {
-          setCurrentUser(localUser);
-        } else {
-          setCurrentUser(null);
-        }
+      } catch (err) {
+        console.warn('Auth state handler note:', err);
+      } finally {
+        clearTimeout(safetyTimer);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(safetyTimer);
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email, password) => {
