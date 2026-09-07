@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { campaignService } from '../../services/campaignService';
 import { donationService } from '../../services/donationService';
 import { volunteerService } from '../../services/volunteerService';
@@ -21,10 +22,13 @@ import {
   Stethoscope,
   GraduationCap,
   Droplet,
-  Utensils
+  Utensils,
+  CalendarCheck,
+  FileText
 } from 'lucide-react';
 
 export const Home = () => {
+  const { currentUser, isVolunteer, isBeneficiary } = useAuth();
   const [campaigns, setCampaigns] = useState([]);
   const [recentDonations, setRecentDonations] = useState([]);
   const [stats, setStats] = useState({
@@ -130,17 +134,42 @@ export const Home = () => {
                 Join GiveHope in providing emergency flood relief rations, life-saving medical aid, solar water borewells, and school sponsorships to vulnerable families across Pakistan.
               </p>
 
-              {/* Action Buttons */}
+              {/* Action Buttons: Role Conditional */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', paddingTop: '0.5rem' }}>
-                <Link to="/donate" className="btn btn-lg btn-accent" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '700' }}>
-                  <Heart size={20} fill="#FFFFFF" /> Donate Now
-                </Link>
-                <Link to="/volunteer" className="btn btn-lg btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.12)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.25)' }}>
-                  <HandHeart size={20} color="#14B8A6" /> Volunteer
-                </Link>
-                <Link to="/request-aid" className="btn btn-lg" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#A7F3D0', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
-                  <span>Apply for Aid</span> <ArrowRight size={18} />
-                </Link>
+                {isVolunteer ? (
+                  <>
+                    <Link to="/volunteer" className="btn btn-lg btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '700' }}>
+                      <CalendarCheck size={20} /> My Volunteer Hub
+                    </Link>
+                    <Link to="/request-aid" className="btn btn-lg btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.12)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.25)' }}>
+                      <HeartHandshake size={20} color="#14B8A6" /> Submit Field Aid Case
+                    </Link>
+                    <Link to="/campaigns" className="btn btn-lg btn-accent" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Flame size={18} fill="#FFFFFF" /> Campaigns
+                    </Link>
+                  </>
+                ) : isBeneficiary ? (
+                  <>
+                    <Link to="/request-aid" className="btn btn-lg btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '700' }}>
+                      <HeartHandshake size={20} /> Apply for Aid
+                    </Link>
+                    <Link to="/my-aid-requests" className="btn btn-lg btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.12)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.25)' }}>
+                      <FileText size={20} color="#14B8A6" /> Track My Requests
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/donate" className="btn btn-lg btn-accent" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '700' }}>
+                      <Heart size={20} fill="#FFFFFF" /> Donate Now
+                    </Link>
+                    <Link to="/volunteer" className="btn btn-lg btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.12)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.25)' }}>
+                      <HandHeart size={20} color="#14B8A6" /> Volunteer
+                    </Link>
+                    <Link to="/request-aid" className="btn btn-lg" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#A7F3D0', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+                      <span>Apply for Aid</span> <ArrowRight size={18} />
+                    </Link>
+                  </>
+                )}
               </div>
 
               {/* Trust Indicators */}
@@ -494,19 +523,21 @@ export const Home = () => {
         <div className="container">
           <div className="grid grid-cols-2 gap-8 items-center">
             <div>
-              <span className="section-tag">Join Our Volunteer Force</span>
+              <span className="section-tag">{isVolunteer ? 'Active Volunteer Force' : 'Join Our Volunteer Force'}</span>
               <h2 style={{ fontSize: '2.4rem', color: 'var(--navy)', marginBottom: '1.25rem' }}>
-                Your Time & Skills Can Save a Life.
+                {isVolunteer ? 'Together on the Frontlines of Hope.' : 'Your Time & Skills Can Save a Life.'}
               </h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.7', marginBottom: '1.75rem' }}>
-                Whether you are a medical professional, teacher, driver, student, or logistics coordinator, we have meaningful volunteer positions across all provinces. Receive certified training, field experience, and official volunteer certificates.
+                {isVolunteer 
+                  ? 'Thank you for your active dedication as a GiveHope field coordinator. You can review upcoming distribution drives, submit field aid applications, or track your verified service hours in your hub.'
+                  : 'Whether you are a medical professional, teacher, driver, student, or logistics coordinator, we have meaningful volunteer positions across all provinces. Receive certified training, field experience, and official volunteer certificates.'}
               </p>
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <Link to="/volunteer" className="btn btn-primary" style={{ padding: '0.85rem 1.75rem' }}>
-                  <HandHeart size={18} /> Apply as a Volunteer
+                  <HandHeart size={18} /> {isVolunteer ? 'Go to My Volunteer Hub' : 'Apply as a Volunteer'}
                 </Link>
-                <Link to="/about" className="btn btn-outline" style={{ padding: '0.85rem 1.75rem' }}>
-                  Learn More About Us
+                <Link to={isVolunteer ? '/request-aid' : '/about'} className="btn btn-outline" style={{ padding: '0.85rem 1.75rem' }}>
+                  {isVolunteer ? 'Submit Field Aid Request' : 'Learn More About Us'}
                 </Link>
               </div>
             </div>

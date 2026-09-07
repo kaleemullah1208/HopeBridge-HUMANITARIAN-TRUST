@@ -352,7 +352,14 @@ export const AidRequestsManagement = () => {
                     </td>
                     <td>
                       <div>
-                        <div style={{ fontWeight: '700', color: 'var(--navy)', fontSize: '0.9rem' }}>{req.fullName}</div>
+                        <div style={{ fontWeight: '700', color: 'var(--navy)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <span>{req.applicantName || req.fullName}</span>
+                          {req.submittedBy === 'volunteer' && (
+                            <span style={{ fontSize: '0.65rem', backgroundColor: '#ECFDF5', color: '#047857', border: '1px solid #A7F3D0', padding: '1px 5px', borderRadius: '4px', fontWeight: '700' }}>
+                              Vol Ref: {req.volunteerName?.split(' ')[0] || 'Lead'}
+                            </span>
+                          )}
+                        </div>
                         <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                           CNIC: <span className="font-mono">{req.cnic || 'N/A'}</span> • {req.phone}
                         </div>
@@ -412,6 +419,16 @@ export const AidRequestsManagement = () => {
           size="lg"
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Volunteer referral alert if submitted by volunteer */}
+            {selectedRequest.submittedBy === 'volunteer' && (
+              <div style={{ backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: '#065F46' }}>
+                <UserCheck size={18} />
+                <span>
+                  <strong>Field Case Logged by Volunteer:</strong> {selectedRequest.volunteerName || 'Field Lead'} (Phone: {selectedRequest.volunteerPhone || 'On-file'})
+                </span>
+              </div>
+            )}
+
             {/* Header info bar */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
               <div>
@@ -433,7 +450,7 @@ export const AidRequestsManagement = () => {
             <div className="grid grid-cols-2 gap-4" style={{ fontSize: '0.88rem' }}>
               <div>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Applicant Name:</span>
-                <div style={{ fontWeight: '700', color: 'var(--navy)' }}>{selectedRequest.fullName}</div>
+                <div style={{ fontWeight: '700', color: 'var(--navy)' }}>{selectedRequest.applicantName || selectedRequest.fullName}</div>
               </div>
 
               <div>

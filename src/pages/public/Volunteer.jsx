@@ -316,7 +316,14 @@ export const Volunteer = () => {
                     </p>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <Link
+                      to="/request-aid"
+                      className="btn btn-sm btn-accent"
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                    >
+                      <HeartHandshake size={15} fill="#FFFFFF" /> Submit Field Aid Case
+                    </Link>
                     <div style={{ textAlign: 'center', background: 'var(--primary-light)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)' }}>
                       <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary-dark)' }}>
                         {existingVolunteer.hoursContributed || 24} hrs

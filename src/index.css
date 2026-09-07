@@ -1,6 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ==========================================================================
-   NGO DONATION & VOLUNTEER MANAGEMENT SYSTEM - DESIGN SYSTEM
-   Humanitarian Aesthetic: Trust + Hope + Compassion + Professionalism
+   GIVEHOPE HUMANITARIAN TRUST - PRODUCTION DESIGN SYSTEM
+   Theme: Emerald (#0D9488) + Slate Navy (#0F172A) + Warm Amber (#F59E0B)
    ========================================================================== */
 
 :root {
@@ -788,11 +792,66 @@ textarea.form-control {
   }
 }
 
-.skeleton-shimmer {
-  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite ease-in-out;
-  border-radius: var(--radius-sm);
+/* ==========================================================================
+   MODERN UI / UX UTILITY CLASSES
+   ========================================================================== */
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.02);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #0D9488 0%, #065F46 50%, #D97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.container-custom {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.section-spacing {
+  padding-top: 4.5rem;
+  padding-bottom: 5rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1.5px solid #CBD5E1;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  font-size: 0.92rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #0D9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.18);
+}
+
+.input::placeholder {
+  color: #94A3B8;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .skeleton-shimmer-dark {

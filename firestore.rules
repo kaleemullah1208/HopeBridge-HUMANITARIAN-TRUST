@@ -28,13 +28,14 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Aid Requests (Beneficiary / Welfare Assistance)
+    // Aid Requests (Beneficiary / Welfare Assistance & Field Volunteer Submissions)
     match /aid_requests/{requestId} {
       allow read: if isAdmin() || (isAuthenticated() && (
         resource.data.applicantId == request.auth.uid ||
+        resource.data.volunteerId == request.auth.uid ||
         resource.data.email == request.auth.token.email
       ));
-      allow create: if true; // Public aid applicants & guest applicants
+      allow create: if true; // Public aid applicants, logged-in beneficiaries, and field volunteers
       allow update, delete: if isAdmin();
     }
 

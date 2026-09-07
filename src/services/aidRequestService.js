@@ -68,21 +68,29 @@ export const aidRequestService = {
     const year = new Date().getFullYear();
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const aidId = `AID-${year}-${randomSuffix}`;
+    const name = aidData.applicantName || aidData.fullName || 'Anonymous Beneficiary';
+    const reasonText = aidData.reason || aidData.description || 'Request for humanitarian assistance.';
 
     const newRequest = {
       id: aidId,
       applicantId: aidData.applicantId || 'guest',
-      fullName: aidData.fullName || 'Anonymous Beneficiary',
+      applicantName: name,
+      fullName: name,
       email: aidData.email || '',
       phone: aidData.phone || '',
       cnic: aidData.cnic || 'Unspecified',
       city: aidData.city || 'Lahore',
       address: aidData.address || '',
-      category: aidData.category || 'Emergency Financial Relief',
+      category: aidData.category || 'Medical Aid',
       amountNeeded: Number(aidData.amountNeeded) || 10000,
-      description: aidData.description || 'Request for humanitarian assistance.',
+      reason: reasonText,
+      description: reasonText,
       documentUrl: aidData.documentUrl || '',
       status: 'Pending',
+      submittedBy: aidData.submittedBy || (aidData.volunteerId ? 'volunteer' : (aidData.applicantId && aidData.applicantId !== 'guest' ? 'beneficiary' : 'guest')),
+      volunteerId: aidData.volunteerId || null,
+      volunteerName: aidData.volunteerName || null,
+      volunteerPhone: aidData.volunteerPhone || null,
       adminNotes: '',
       createdAt: new Date().toISOString(),
       disbursedAt: null
@@ -100,14 +108,17 @@ export const aidRequestService = {
       console.warn('Firestore setDoc aid_requests note:', err);
     }
 
-    // Log Activity in Firestore
+    // Log Activity
+    const isVolunteerSubmission = newRequest.submittedBy === 'volunteer';
     activityService.logActivity({
-      type: 'aid_requested',
-      title: 'New Aid Application Received',
-      description: `${newRequest.fullName} requested Rs. ${newRequest.amountNeeded.toLocaleString()} for ${newRequest.category}`,
-      actor: newRequest.fullName,
-      icon: 'HelpCircle',
-      meta: { aidId: newRequest.id, category: newRequest.category, amount: newRequest.amountNeeded }
+      type: 'aid_request_submitted',
+      title: isVolunteerSubmission ? 'Field Aid Request Logged' : 'New Aid Application',
+      description: isVolunteerSubmission
+        ? `Volunteer ${newRequest.volunteerName || 'Field Lead'} submitted an aid request for ${newRequest.fullName} (PKR ${Number(newRequest.amountNeeded).toLocaleString()})`
+        : `${newRequest.fullName} submitted an aid request for ${newRequest.category} (PKR ${Number(newRequest.amountNeeded).toLocaleString()})`,
+      actor: isVolunteerSubmission ? (newRequest.volunteerName || 'Volunteer') : newRequest.fullName,
+      icon: 'HeartHandshake',
+      meta: { aidId: newRequest.id, category: newRequest.category, amount: newRequest.amountNeeded, submittedBy: newRequest.submittedBy }
     });
 
     return { success: true, aidRequest: newRequest };
